@@ -8,6 +8,7 @@ type FeedItem = {
   link: string
   pubDate: string
   source: string
+  description: string
 }
 
 type Feed = {
@@ -34,6 +35,7 @@ export default function TodaysNews() {
         const allItems = await Promise.all(
           feeds.map(async (feed) => {
             const response = await fetch(`${feed.url}`)
+            
             if (!response.ok) {
               throw new Error(`Failed to fetch RSS feed: ${feed.name}`)
             }
@@ -41,12 +43,21 @@ export default function TodaysNews() {
             const parser = new DOMParser()
             const xmlDoc = parser.parseFromString(text, 'text/xml')
             const items = xmlDoc.querySelectorAll('item')
-            return Array.from(items).slice(0, 5).map((item) => ({
-              title: item.querySelector('title')?.textContent || '',
-              link: item.querySelector('link')?.textContent || '',
-              pubDate: item.querySelector('pubDate')?.textContent || '',
-              source: feed.name,
-            }))
+            return Array.from(items).slice(0, 6).map((item) => {
+              const descriptionElement = item.querySelector('description');
+              const descriptionContent = descriptionElement?.textContent || '';
+              const parser2 = new DOMParser();
+              const descriptionDoc = parser2.parseFromString(descriptionContent, 'text/html');
+              const paragraphContent = descriptionDoc.querySelector('p')?.textContent || '??';
+
+              return {
+                title: item.querySelector('title')?.textContent || '',
+                link: item.querySelector('link')?.textContent || '',
+                pubDate: item.querySelector('pubDate')?.textContent || '',
+                description: paragraphContent,
+                source: feed.name,
+              };
+            })
           })
         )
         setFeedItems(allItems.flat().sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()))
@@ -125,6 +136,7 @@ export default function TodaysNews() {
             <p className="text-sm text-gray-400">
               {new Date(item.pubDate).toLocaleDateString()} - Source: {item.source}
             </p>
+            <p className="text-sm text-gray-400">{item.description}</p>
           </li>
         ))}
       </ul>

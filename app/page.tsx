@@ -1,4 +1,4 @@
-import DarkUiWithChat from "@/components/dark-ui-with-chat"
+import DarkUiWithChat from "@/components/ProductivityTool"
 
 export default function Page() {
   return <DarkUiWithChat />
