@@ -47,6 +47,7 @@ export default function TodaysNews() {
               const descriptionElement = item.querySelector('description');
               const descriptionContent = descriptionElement?.textContent || '';
               const parser2 = new DOMParser();
+              // I want to remove the html tags and only keep the text, becuase I love XML.
               const descriptionDoc = parser2.parseFromString(descriptionContent, 'text/html');
               const paragraphContent = descriptionDoc.querySelector('p')?.textContent || '??';
 

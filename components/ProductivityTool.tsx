@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Shuffle, Home, Database, Send, Search } from 'lucide-react'
+import { Shuffle, Home, Database, Maximize2, Send, Search, BarChart } from 'lucide-react'
 import TodaysNews from './TodaysNews'
+import OOMMetricDashboard from './OOMMetricDashboard'
 
 type Message = {
   role: 'user' | 'assistant'
@@ -14,7 +15,7 @@ type Tag = {
   active: boolean
 }
 
-export default function Component() {
+export default function ProductivityTool() {
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -95,6 +96,13 @@ export default function Component() {
               >
                 <span>Save to Vector DB</span>
                 <Database className="w-4 h-4" />
+              </div>
+              <div
+                className="flex items-center justify-between cursor-pointer hover:text-gray-200"
+                onClick={() => setSelectedItem('OOM Metric Dashboard')}
+              >
+                <span>OOM Metric Dashboard</span>
+                <BarChart className="w-4 h-4" />
               </div>
               <div className="flex items-center justify-between cursor-pointer hover:text-gray-200">
                 <span>Will do some stuff here</span>
@@ -184,10 +192,14 @@ export default function Component() {
               Save
             </button>
           </div>
+        ) : selectedItem === 'OOM Metric Dashboard' ? (
+          <div className="flex-1 p-4">
+            <OOMMetricDashboard />
+          </div>
         ) : (
           <div className="flex-1 p-4 space-y-4">
             <div className="border border-dashed border-gray-700 rounded-lg p-4 flex items-center justify-center">
-              <h1 className="text-2xl font-bold">Welcome to Your Dashboard</h1>
+              <h1 className="text-2xl font-bold">Welcome to Your Productivity Dashboard</h1>
             </div>
             <TodaysNews />
           </div>
