@@ -30,17 +30,17 @@ const chartData = [
 
 const chartConfig = {
   ooms: {
-    label: "OOMs",
-    color: "hsl(var(--chart-2))",
+    label: "OOM",
+    color: "hsl(var(--chart-3))",
   },
   label: {
-    color: "hsl(var(--background))",
+    color: "black",
   },
 } satisfies ChartConfig
 
 export default function OOMMetricDashboard() {
   return (
-    <Card className="bg-gray-800 text-white-100">
+    <Card className="bg-gray-800 text-white-100 w-1/2"> 
       <CardHeader>
         <CardTitle>Metaspace OOMs - Daily Metrics</CardTitle>
       </CardHeader>
@@ -51,7 +51,7 @@ export default function OOMMetricDashboard() {
             data={chartData}
             layout="vertical"
             margin={{
-              right: 16,
+              right: 50,
             }}
           >
             <CartesianGrid horizontal={false} />
@@ -64,50 +64,39 @@ export default function OOMMetricDashboard() {
               hide
             />
             <XAxis dataKey="ooms" type="number" hide />
-            {/* <ChartTooltip
-              cursor={false}
-              content={({ payload }) => (
-                <ChartTooltipContent
-                  indicator="line"
-                  content={
-                    payload && payload.length > 0
-                      ? [
-                          {
-                            label: "OOMs",
-                            value: payload[0].value as string,
-                          },
-                        ]
-                      : []
-                  }
-                />
-              )}
-            /> */}
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent indicator="line" />}
-              contentStyle={{
-                backgroundColor: "hsl(var(--background))",
-              }}
+              content={<ChartTooltipContent indicator="dot" />}
+              labelFormatter={(label) => (
+                <span style={{ fontStyle: "bold", backgroundColor: "white", fontSize: "14px", color: "black"}}>{label}</span>
+              )}
+              formatter={(value) => (
+                <span style={{ fontStyle: "bold", backgroundColor: "beige", fontSize: "14px", color: "black"}}>{`${value} Metaspace OOMs`}</span>
+                )}
+
             />
             <Bar
               dataKey="ooms"
               layout="vertical"
               fill="var(--color-ooms)"
-              radius={4}
+              radius={5}
+              width={100}
             >
               <LabelList
                 dataKey="day"
                 position="insideLeft"
                 offset={8}
                 className="fill-[--color-label]"
-                fontSize={12}
+                fontSize={14}
+                style={{ fill: "white" }}
               />
               <LabelList
                 dataKey="ooms"
                 position="right"
                 offset={8}
-                className="fill-foreground"
-                fontSize={12}
+                style={{ fill: "white" }}
+                className="fill-foreground "
+                fontSize={15}
               />
             </Bar>
           </BarChart>
@@ -115,7 +104,7 @@ export default function OOMMetricDashboard() {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 15% this week <TrendingUp className="h-4 w-4" />
+          Trending up/down by xx% this week <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
           Showing total OOMs for each day of the week
