@@ -35,7 +35,7 @@ export default function ProductivityTool() {
     if (input.trim()) {
       setMessages([...messages, { role: 'user', content: input }])
       setTimeout(() => {
-        setMessages(prev => [...prev, { role: 'assistant', content: `Response to: ${input}` }])
+        setMessages(prev => [...prev, { role: 'assistant', content: `CyrusAi says: ${input}` }])
       }, 1000)
       setInput('')
     }

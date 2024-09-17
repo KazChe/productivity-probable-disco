@@ -3,31 +3,20 @@
 import { TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts"
 
-// Simplified Card components
-const Card = ({ children, className = "" }) => (
-  <div className={`bg-gray-800 text-gray-100 rounded-lg shadow-lg ${className}`}>{children}</div>
-)
-const CardHeader = ({ children }) => <div className="p-4 border-b border-gray-700">{children}</div>
-const CardTitle = ({ children }) => <h2 className="text-xl font-semibold">{children}</h2>
-const CardContent = ({ children }) => <div className="p-4">{children}</div>
-const CardFooter = ({ children, className = "" }) => (
-  <div className={`p-4 border-t border-gray-700 ${className}`}>{children}</div>
-)
-
-// Simplified Chart components
-const ChartContainer = ({ children, config }) => (
-  <div className="w-full h-64">{children}</div>
-)
-const ChartTooltip = ({ cursor, content }) => content
-const ChartTooltipContent = ({ indicator, content }) => (
-  <div className="bg-gray-900 p-2 rounded shadow">
-    {content.map((item, index) => (
-      <div key={index}>
-        {item.label}: {item.value}
-      </div>
-    ))}
-  </div>
-)
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
 
 const chartData = [
   { day: "Monday", ooms: 5 },
@@ -42,31 +31,27 @@ const chartData = [
 const chartConfig = {
   ooms: {
     label: "OOMs",
-    color: "hsl(215, 70%, 60%)",
+    color: "hsl(var(--chart-2))",
   },
   label: {
-    color: "hsl(0, 0%, 100%)",
+    color: "hsl(var(--background))",
   },
-}
+} satisfies ChartConfig
 
 export default function OOMMetricDashboard() {
   return (
-    <Card>
+    <Card className="bg-gray-800 text-white-100">
       <CardHeader>
         <CardTitle>Metaspace OOMs - Daily Metrics</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart
-            width={600}
-            height={300}
+            accessibilityLayer
             data={chartData}
             layout="vertical"
             margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
+              right: 16,
             }}
           >
             <CartesianGrid horizontal={false} />
@@ -76,9 +61,10 @@ export default function OOMMetricDashboard() {
               tickLine={false}
               tickMargin={10}
               axisLine={false}
+              hide
             />
-            <XAxis dataKey="ooms" type="number" />
-            <ChartTooltip
+            <XAxis dataKey="ooms" type="number" hide />
+            {/* <ChartTooltip
               cursor={false}
               content={({ payload }) => (
                 <ChartTooltipContent
@@ -95,33 +81,40 @@ export default function OOMMetricDashboard() {
                   }
                 />
               )}
+            /> */}
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent indicator="line" />}
             />
             <Bar
               dataKey="ooms"
-              fill={chartConfig.ooms.color}
+              layout="vertical"
+              fill="var(--color-ooms)"
               radius={4}
             >
               <LabelList
                 dataKey="day"
                 position="insideLeft"
-                fill={chartConfig.label.color}
+                offset={8}
+                className="fill-[--color-label]"
                 fontSize={12}
               />
               <LabelList
                 dataKey="ooms"
                 position="right"
-                fill={chartConfig.label.color}
+                offset={8}
+                className="fill-foreground"
                 fontSize={12}
               />
             </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium">
+      <CardFooter className="flex-col items-start gap-2 text-sm">
+        <div className="flex gap-2 font-medium leading-none">
           Trending up by 15% this week <TrendingUp className="h-4 w-4" />
         </div>
-        <div className="text-gray-400">
+        <div className="leading-none text-muted-foreground">
           Showing total OOMs for each day of the week
         </div>
       </CardFooter>
