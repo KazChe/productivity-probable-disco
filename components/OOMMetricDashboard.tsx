@@ -85,6 +85,9 @@ export default function OOMMetricDashboard() {
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent indicator="line" />}
+              contentStyle={{
+                backgroundColor: "hsl(var(--background))",
+              }}
             />
             <Bar
               dataKey="ooms"
