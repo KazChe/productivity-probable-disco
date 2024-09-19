@@ -24,12 +24,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
-type ChartDataItem = {
-  day: string;
-  ooms: number;
-  instances: Record<string, number>;
-};
-
 // TODO: Replace with actual data coming from the backend
 const chartData = [
   { day: "Monday", ooms: 5, instances: { "unicorn-sparkle": 2, "dragon-breath": 3} },

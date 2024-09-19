@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Shuffle, Home, Database, Maximize2, Send, Search, BarChart } from 'lucide-react'
+import { Shuffle, Home, Database, Send, Search, BarChart } from 'lucide-react'
 import TodaysNews from './TodaysNews'
 import OOMMetricDashboard from './OOMMetricDashboard'
 
@@ -198,9 +198,6 @@ export default function ProductivityTool() {
           </div>
         ) : (
           <div className="flex-1 p-4 space-y-4">
-            <div className="border border-dashed border-gray-700 rounded-lg p-4 flex items-center justify-center">
-              <h1 className="text-2xl font-bold">Welcome to Your Productivity Dashboard</h1>
-            </div>
             <TodaysNews />
           </div>
         )}
