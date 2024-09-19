@@ -31,6 +31,7 @@ type ChartDataItem = {
   instances: Record<string, number>;
 };
 
+// TODO: Replace with actual data coming from the backend
 const chartData = [
   { day: "Monday", ooms: 5, instances: { "unicorn-sparkle": 2, "dragon-breath": 3} },
   { day: "Tuesday", ooms: 8, instances: { "pixie-dust": 5, "mermaid-scale": 3} },
@@ -86,12 +87,15 @@ export default function OOMMetricDashboard() {
                 cursor={false}
                 content={<ChartTooltipContent indicator="dot" />}
                 labelFormatter={(label) => (
-                  <span style={{ fontStyle: "bold", backgroundColor: "white", fontSize: "14px", color: "black"}}>{label}</span>
+                  <span style={{ fontStyle: "bold", fontSize: "14px", color: "black"}}>{label}</span>
                 )}
-
                 formatter={(value) => (
-                  <span style={{ fontStyle: "bold", backgroundColor: "beige", fontSize: "14px", color: "black"}}>{`${value} Metaspace OOMs`}</span>
-                  )}
+                  <span style={{ fontStyle: "bold",fontSize: "14px", color: "black"}}>{`${value} errors`}</span>
+                )}
+                wrapperStyle={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  borderRadius: '5px',
+                }}
               />
               <Bar
                 dataKey="ooms"
