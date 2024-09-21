@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Shuffle, Home, Database, Send, Search, BarChart } from "lucide-react";
+import { Home, Database, Send, Search, BarChart, CloudCogIcon } from "lucide-react";
 import TodaysNews from "./TodaysNews";
 import OOMMetricDashboard from "./OOMMetricDashboard";
 import InstanceControl from "./InstanceControl";
@@ -116,7 +116,7 @@ export default function ProductivityTool() {
               >
                 {/* TODO: fix css */}
                 <span>Neo4j Aura Instance Control</span>
-                <Shuffle className="w-4 h-4" />
+                <CloudCogIcon className="w-4 h-4" />
               </div>
             </div>
           </div>

@@ -28,7 +28,10 @@ const tenants = [
   },
 ];
 
-const instancesByTenant = {
+type Instance = { id: string; status: keyof typeof statusColors };
+type InstancesByTenant = { [key: string]: Instance[] };
+
+const instancesByTenant: InstancesByTenant = {
   "aws tenant fireflies 4ee3446990-bb00-343400-bc3b": [
     { id: "4z64ea3b", status: "running" },
     { id: "7a91fc2d", status: "running" },
@@ -47,14 +50,21 @@ const statusColors = {
   resuming: "text-blue-500",
 };
 
+// Update the AlertType to include "warning"
+type AlertType = {
+  title: string;
+  description: string;
+  variant: "default" | "destructive" | "warning";
+} | null;
+
 export default function InstanceControl() {
   const [tenantId, setTenantId] = useState("");
-  const [instances, setInstances] = useState([]);
+  const [instances, setInstances] = useState<Instance[]>([]);
   const [instanceId, setInstanceId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState(null);
-  const [selectedInstance, setSelectedInstance] = useState(null);
-  const [alert, setAlert] = useState(null);
+  const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
+  const [alert, setAlert] = useState<AlertType>(null);
 
   useEffect(() => {
     if (tenantId) {
@@ -64,7 +74,7 @@ export default function InstanceControl() {
     }
   }, [tenantId]);
 
-  const showAlert = (title, description, variant = "default") => {
+  const showAlert = (title: string, description: string, variant: "default" | "destructive" | "warning" = "default") => {
     setAlert({ title, description, variant });
     setTimeout(() => setAlert(null), 5000); // hide alert after 5 seconds
   };
@@ -129,12 +139,12 @@ export default function InstanceControl() {
     }
   };
 
-  const handleInstanceSelect = (instance) => {
+  const handleInstanceSelect = (instance: Instance) => {
     setSelectedInstance(instance.id === selectedInstance ? null : instance.id);
     setInstanceId(instance.id === selectedInstance ? "" : instance.id);
   };
 
-  const getActionButtonText = (status) => {
+  const getActionButtonText = (status: string) => {
     switch (status) {
       case "running":
         return "Pause Instance";
@@ -148,8 +158,8 @@ export default function InstanceControl() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 bg-card rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold mb-6 text-center">Instance Control</h1>
+    <div className="max-w-3xl mx-auto p-6 bg-card rounded-lg bg-gray-800 text-white-100">
+      <h1 className="text-2xl font-bold text-center">Instance Control</h1>
       {alert && (
         <Alert variant={alert.variant} className="mb-4">
           <AlertTitle>{alert.title}</AlertTitle>
@@ -181,9 +191,10 @@ export default function InstanceControl() {
                   {instances.map((instance) => (
                     <div
                       key={instance.id}
-                      className="flex items-center space-x-2"
+                      className="flex items-center space-x-2 border-b border-gray-700 pb-2"
                     >
                       <Checkbox
+                        className="border-white-100"
                         id={instance.id}
                         checked={selectedInstance === instance.id}
                         onCheckedChange={() => handleInstanceSelect(instance)}
@@ -233,13 +244,13 @@ export default function InstanceControl() {
                 </>
               ) : (
                 getActionButtonText(
-                  instances.find((i) => i.id === instanceId)?.status
+                  instances.find((i) => i.id === instanceId)?.status || ""
                 )
               )}
             </Button>
           </form>
         </div>
-        <Card>
+        <Card className="bg-gray-800 text-white-100">
           <CardHeader>
             <CardTitle>Response</CardTitle>
           </CardHeader>
