@@ -223,7 +223,7 @@ export default function InstanceControl() {
                 id="instanceId"
                 value={instanceId}
                 readOnly
-                className="bg-muted"
+                className="bg-gray-700"
                 placeholder="Selected instance ID will appear here"
               />
             </div>
