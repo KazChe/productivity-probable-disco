@@ -1,80 +1,86 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Shuffle, Home, Database, Send, Search, BarChart } from 'lucide-react'
-import TodaysNews from './TodaysNews'
-import OOMMetricDashboard from './OOMMetricDashboard'
+import { useState } from "react";
+import { Shuffle, Home, Database, Send, Search, BarChart } from "lucide-react";
+import TodaysNews from "./TodaysNews";
+import OOMMetricDashboard from "./OOMMetricDashboard";
+import InstanceControl from "./InstanceControl";
 
 type Message = {
-  role: 'user' | 'assistant'
-  content: string
-}
+  role: "user" | "assistant";
+  content: string;
+};
 
 type Tag = {
-  name: string
-  active: boolean
-}
+  name: string;
+  active: boolean;
+};
 
 export default function ProductivityTool() {
-  const [selectedItem, setSelectedItem] = useState<string | null>(null)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [vectorDbInput, setVectorDbInput] = useState('')
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [vectorDbInput, setVectorDbInput] = useState("");
   const [tags, setTags] = useState<Tag[]>([
-    { name: 'slack', active: false },
-    { name: 'document', active: false },
-    { name: 'neo4j-driver', active: false },
-    { name: 'template-response', active: false },
-    { name: 'code-snippet', active: false },
-    { name: 'logging-query', active: false },
-    { name: 'cypher', active: false },
-  ])
+    { name: "slack", active: false },
+    { name: "document", active: false },
+    { name: "neo4j-driver", active: false },
+    { name: "template-response", active: false },
+    { name: "code-snippet", active: false },
+    { name: "logging-query", active: false },
+    { name: "cypher", active: false },
+  ]);
 
   const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (input.trim()) {
-      setMessages([...messages, { role: 'user', content: input }])
+      setMessages([...messages, { role: "user", content: input }]);
       setTimeout(() => {
-        setMessages(prev => [...prev, { role: 'assistant', content: `CyrusAi says: ${input}` }])
-      }, 1000)
-      setInput('')
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: `CyrusAi says: ${input}` },
+        ]);
+      }, 1000);
+      setInput("");
     }
-  }
+  };
 
   const handleTagToggle = (index: number) => {
-    const newTags = [...tags]
-    newTags[index].active = !newTags[index].active
-    setTags(newTags)
-  }
+    const newTags = [...tags];
+    newTags[index].active = !newTags[index].active;
+    setTags(newTags);
+  };
 
   const handleSaveToVectorDb = () => {
-    const activeTags = tags.filter(tag => tag.active).map(tag => tag.name)
-    console.log('Saving to Vector DB:', { text: vectorDbInput, tags: activeTags })
+    const activeTags = tags.filter((tag) => tag.active).map((tag) => tag.name);
+    console.log("Saving to Vector DB:", {
+      text: vectorDbInput,
+      tags: activeTags,
+    });
     // Here you would typically send this data to your backend
-    setVectorDbInput('')
-    setTags(tags.map(tag => ({ ...tag, active: false })))
-  }
+    setVectorDbInput("");
+    setTags(tags.map((tag) => ({ ...tag, active: false })));
+  };
 
   const handleHomeClick = () => {
-    setSelectedItem(null)
-  }
+    setSelectedItem(null);
+  };
 
   return (
     <div className="flex h-screen bg-gray-900 text-gray-300">
       {/* Sidebar */}
       <div className="w-64 border-r border-gray-800 flex flex-col">
         {/* Header */}
-        <div 
+        <div
           className="flex items-center justify-between p-4 border-b border-gray-800 cursor-pointer hover:bg-gray-800"
           onClick={handleHomeClick}
         >
           <span className="font-semibold">Productivity Tool</span>
           <Home className="w-4 h-4" />
         </div>
-        
+
         {/* Sidebar content */}
         <div className="p-4 flex-grow">
-          {/* Playground */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -85,33 +91,37 @@ export default function ProductivityTool() {
             <div className="pl-6 space-y-2 text-sm text-gray-500">
               <div
                 className="flex items-center justify-between cursor-pointer hover:text-gray-200"
-                onClick={() => setSelectedItem('Search My Stuff')}
+                onClick={() => setSelectedItem("Search My Stuff")}
               >
                 <span>Search My Stuff</span>
                 <Search className="w-4 h-4" />
               </div>
               <div
                 className="flex items-center justify-between cursor-pointer hover:text-gray-200"
-                onClick={() => setSelectedItem('Save to Vector DB')}
+                onClick={() => setSelectedItem("Save to Vector DB")}
               >
                 <span>Save to Vector DB</span>
                 <Database className="w-4 h-4" />
               </div>
               <div
                 className="flex items-center justify-between cursor-pointer hover:text-gray-200"
-                onClick={() => setSelectedItem('OOM Metric Dashboard')}
+                onClick={() => setSelectedItem("OOM Metric Dashboard")}
               >
                 <span>OOM Metric Dashboard</span>
                 <BarChart className="w-4 h-4" />
               </div>
-              <div className="flex items-center justify-between cursor-pointer hover:text-gray-200">
-                <span>Will do some stuff here</span>
+              <div
+                className="flex items-center justify-between cursor-pointer hover:text-gray-200"
+                onClick={() => setSelectedItem("Neo4j Aura Instance Control")}
+              >
+                {/* TODO: fix css */}
+                <span>Neo4j Aura Instance Control</span>
                 <Shuffle className="w-4 h-4" />
               </div>
             </div>
           </div>
         </div>
-        
+
         {/* Home button at the bottom */}
         <div className="p-4">
           <div
@@ -123,22 +133,22 @@ export default function ProductivityTool() {
           </div>
         </div>
       </div>
-      
+
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-auto">
-        {selectedItem === 'Search My Stuff' ? (
+        {selectedItem === "Search My Stuff" ? (
           <div className="flex-1 flex flex-col p-4">
             <div className="flex-1 overflow-auto mb-4">
               {messages.map((message, index) => (
                 <div
                   key={index}
                   className={`mb-4 ${
-                    message.role === 'user' ? 'text-right' : 'text-left'
+                    message.role === "user" ? "text-right" : "text-left"
                   }`}
                 >
                   <div
                     className={`inline-block p-2 rounded-lg ${
-                      message.role === 'user' ? 'bg-blue-600' : 'bg-gray-700'
+                      message.role === "user" ? "bg-blue-600" : "bg-gray-700"
                     }`}
                   >
                     {message.content}
@@ -162,7 +172,7 @@ export default function ProductivityTool() {
               </button>
             </form>
           </div>
-        ) : selectedItem === 'Save to Vector DB' ? (
+        ) : selectedItem === "Save to Vector DB" ? (
           <div className="flex-1 flex flex-col p-4">
             <textarea
               value={vectorDbInput}
@@ -177,8 +187,8 @@ export default function ProductivityTool() {
                   onClick={() => handleTagToggle(index)}
                   className={`px-3 py-1 rounded-full text-sm ${
                     tag.active
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-700 text-gray-300'
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-700 text-gray-300"
                   }`}
                 >
                   #{tag.name}
@@ -192,9 +202,13 @@ export default function ProductivityTool() {
               Save
             </button>
           </div>
-        ) : selectedItem === 'OOM Metric Dashboard' ? (
+        ) : selectedItem === "OOM Metric Dashboard" ? (
           <div className="flex-1 p-4">
             <OOMMetricDashboard />
+          </div>
+        ) : selectedItem === "Neo4j Aura Instance Control" ? (
+          <div className="flex-1 p-4">
+            <InstanceControl />
           </div>
         ) : (
           <div className="flex-1 p-4 space-y-4">
@@ -203,5 +217,5 @@ export default function ProductivityTool() {
         )}
       </div>
     </div>
-  )
+  );
 }

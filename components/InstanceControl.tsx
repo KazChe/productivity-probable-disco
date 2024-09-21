@@ -47,7 +47,7 @@ const statusColors = {
   resuming: "text-blue-500",
 };
 
-export default function Component() {
+export default function InstanceControl() {
   const [tenantId, setTenantId] = useState("");
   const [instances, setInstances] = useState([]);
   const [instanceId, setInstanceId] = useState("");
@@ -105,7 +105,7 @@ export default function Component() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            //TODO: Add your authentication headers here
+            //TODO: authentication headers here - read from dotenv
           },
         }
       );
