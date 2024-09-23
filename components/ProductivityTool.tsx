@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Home, Database, Send, Search, BarChart, CloudCogIcon } from "lucide-react";
+import {
+  Home,
+  Database,
+  Send,
+  Search,
+  BarChart,
+  CloudCogIcon,
+} from "lucide-react";
 import TodaysNews from "./TodaysNews";
 import OOMMetricDashboard from "./OOMMetricDashboard";
 import InstanceControl from "./InstanceControl";
@@ -107,7 +114,7 @@ export default function ProductivityTool() {
                 className="flex items-center justify-between cursor-pointer hover:text-gray-200"
                 onClick={() => setSelectedItem("OOM Metric Dashboard")}
               >
-                <span>OOM Metric Dashboard</span>
+                <span>Metrics Dashboard</span>
                 <BarChart className="w-4 h-4" />
               </div>
               <div

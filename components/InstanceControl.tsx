@@ -33,14 +33,14 @@ type InstancesByTenant = { [key: string]: Instance[] };
 
 const instancesByTenant: InstancesByTenant = {
   "aws tenant fireflies 4ee3446990-bb00-343400-bc3b": [
-    { id: "4z64ea3b", status: "running" },
-    { id: "7a91fc2d", status: "running" },
-    { id: "3b52xd8e", status: "paused" },
+    { id: "0000001A", status: "running" },
+    { id: "0000002B", status: "running" },
+    { id: "0000003C", status: "paused" },
   ],
   "aws tenant dragonfly 5ff4557001-cc11-454511-cd4c": [
-    { id: "9c73hy1f", status: "resuming" },
-    { id: "2e85gk4p", status: "running" },
-    { id: "6t19lm7q", status: "paused" },
+    { id: "0000111B", status: "resuming" },
+    { id: "0000222C", status: "running" },
+    { id: "0000333D", status: "paused" },
   ],
 };
 
