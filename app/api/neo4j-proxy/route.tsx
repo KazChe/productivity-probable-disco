@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 
 async function fetchInstanceDetails(instanceId: string, accessToken: string) {
-  const detailsResponse = await fetch(`https://api.neo4j.io/v1/instances/${instanceId}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const detailsResponse = await fetch(
+    `https://api.neo4j.io/v1/instances/${instanceId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
 
   if (!detailsResponse.ok) {
     throw new Error(`Failed to fetch details for instance ${instanceId}`);
@@ -56,7 +59,7 @@ export async function GET(request: Request) {
     const instanceDetails = await Promise.all(
       data.data.map(async (instance: any) => {
         const details = await fetchInstanceDetails(instance.id, accessToken);
-        console.log(details);
+        // console.log(details);
         return details.data;
       })
     );

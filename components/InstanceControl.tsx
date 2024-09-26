@@ -85,25 +85,51 @@ export default function InstanceControl() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAlert(null);
-    if (!selectedTenant || selectedInstances.length === 0) {
+    if (!selectedInstance) {
       setAlert({
         title: "Invalid Selection",
-        description: "Please select a tenant and at least one instance.",
+        description: "Please select an instance.",
         variant: "warning",
       });
       return;
     }
 
-    // Here you would typically make an API call to perform the action
-    // For now, we'll just show an alert
-    setAlert({
-      title: "Action Submitted",
-      description: `${action.charAt(0).toUpperCase() + action.slice(1)}ing ${
-        selectedInstances.length
-      } instance(s) for tenant ${selectedTenant}`,
-      variant: "default",
-    });
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/aura-instance-actions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          instanceId: selectedInstance,
+          action: "resume",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setResponse(data);
+      setAlert({
+        title: "Action Successful",
+        description: `Instance ${selectedInstance} is being resumed.`,
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error performing action:", error);
+      setAlert({
+        title: "Action Failed",
+        description: "Failed to perform the action. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   const [tenantId, setTenantId] = useState("");
   const [instanceId, setInstanceId] = useState("");
   const [selectedInstance, setSelectedInstance] = useState("");
@@ -172,7 +198,6 @@ export default function InstanceControl() {
                       key={instance.id}
                       className="flex items-center space-x-2 border-b border-gray-700 pb-2"
                     >
-                        
                       <Checkbox
                         className="border-white-100"
                         id={instance.id}
@@ -185,11 +210,16 @@ export default function InstanceControl() {
                       >
                         <span>{instance.id}</span>
                         <span className="font-medium">({instance.name})</span>
-                        <span className={`font-medium ${statusColors[instance.status] || ''}`}>
+                        <span
+                          className={`font-medium ${
+                            statusColors[instance.status] || ""
+                          }`}
+                        >
                           {instance.status}
                         </span>
                         <span className="text-sm text-gray-400">
-                          {instance.memory} | {instance.storage} | {instance.region}
+                          {instance.memory} | {instance.storage} |{" "}
+                          {instance.region}
                         </span>
                       </Label>
                     </div>
