@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Ban } from "lucide-react";
+import { Loader2, Ban, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -56,6 +56,7 @@ export default function InstanceControl() {
   const [selectedInstances, setSelectedInstances] = useState<string[]>([]);
   const [action, setAction] = useState<"pause" | "resume">("pause");
   const [alert, setAlert] = useState<AlertType>(null);
+  const [selectedInstanceDetails, setSelectedInstanceDetails] = useState<any>(null);
 
   useEffect(() => {
     fetchInstances();
@@ -103,7 +104,7 @@ export default function InstanceControl() {
         },
         body: JSON.stringify({
           instanceId: selectedInstance,
-          action: "resume",
+          action: action, // Use the current action state
         }),
       });
 
@@ -115,14 +116,16 @@ export default function InstanceControl() {
       setResponse(data);
       setAlert({
         title: "Action Successful",
-        description: `Instance ${selectedInstance} is being resumed.`,
+        description: `Instance ${selectedInstance} is being ${action}d.`,
         variant: "default",
       });
+      // Optionally, refresh the instances list after action
+      fetchInstances();
     } catch (error) {
       console.error("Error performing action:", error);
       setAlert({
         title: "Action Failed",
-        description: "Failed to perform the action. Please try again.",
+        description: `Failed to ${action} the instance. Please try again.`,
         variant: "destructive",
       });
     } finally {
@@ -138,14 +141,14 @@ export default function InstanceControl() {
   const handleInstanceSelect = (instance: Instance) => {
     setSelectedInstance(instance.id);
     setInstanceId(instance.id);
+    // Set the action based on the current status of the instance
+    setAction(instance.status === "running" ? "pause" : "resume");
   };
 
   const getActionButtonText = (instanceId: string) => {
-    // console.log("Current instances:", instances);
     const instance = Array.isArray(instances)
       ? instances.find((i) => i.id === instanceId)
       : null;
-    // console.log("Found instance:", instance);
 
     if (!instance) return "Select an Instance";
 
@@ -156,6 +159,27 @@ export default function InstanceControl() {
         return "Resume Instance";
       default:
         return "Select an Instance";
+    }
+  };
+
+  const fetchInstanceDetails = async (instanceId: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/aura-instance-details?instanceId=${instanceId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setSelectedInstanceDetails(data);
+    } catch (error) {
+      console.error("Error fetching instance details:", error);
+      setAlert({
+        title: "Fetch Failed",
+        description: "Failed to fetch instance details. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -221,6 +245,10 @@ export default function InstanceControl() {
                           {instance.memory} | {instance.storage} |{" "}
                           {instance.region}
                         </span>
+                        <RefreshCw 
+                          className="w-4 h-4 cursor-pointer" 
+                          onClick={() => fetchInstanceDetails(instance.id)}
+                        />
                       </Label>
                     </div>
                   ))
@@ -266,8 +294,12 @@ export default function InstanceControl() {
             <CardTitle>Response</CardTitle>
           </CardHeader>
           <CardContent>
-            {response ? (
-              <pre className="text-sm overflow-auto max-h-[300px] p-2 bg-muted rounded">
+            {selectedInstanceDetails ? (
+              <pre className="text-sm overflow-auto max-h-[300px] p-2 rounded">
+                {JSON.stringify(selectedInstanceDetails, null, 2)}
+              </pre>
+            ) : response ? (
+              <pre className="text-sm overflow-auto max-h-[300px] p-2 rounded">
                 {JSON.stringify(response, null, 2)}
               </pre>
             ) : (
