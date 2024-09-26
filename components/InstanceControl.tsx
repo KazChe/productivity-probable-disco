@@ -15,34 +15,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Buffer } from "buffer";
 
-//TODO save tenant data in a database?
-const tenants = [
-  {
-    id: "aws tenant fireflies 4ee3446990-bb00-343400-bc3b",
-    name: "Fireflies Tenant",
-  },
-  {
-    id: "aws tenant dragonfly 5ff4557001-cc11-454511-cd4c",
-    name: "Dragonfly Tenant",
-  },
-];
-
-type Instance = { id: string; status: keyof typeof statusColors };
-type InstancesByTenant = { [key: string]: Instance[] };
-
-const instancesByTenant: InstancesByTenant = {
-  "aws tenant fireflies 4ee3446990-bb00-343400-bc3b": [
-    { id: "0000001A", status: "running" },
-    { id: "0000002B", status: "running" },
-    { id: "0000003C", status: "paused" },
-  ],
-  "aws tenant dragonfly 5ff4557001-cc11-454511-cd4c": [
-    { id: "0000111B", status: "resuming" },
-    { id: "0000222C", status: "running" },
-    { id: "0000333D", status: "paused" },
-  ],
+type Instance = {
+  cdc_enrichment_mode: string;
+  cloud_provider: string;
+  connection_url: string | null;
+  id: string;
+  memory: string;
+  metrics_integration_url: string;
+  name: string;
+  region: string;
+  secondaries_count: number;
+  status: string;
+  storage: string;
+  tenant_id: string;
+  type: string;
 };
+
+type InstancesByTenant = { [key: string]: Instance[] };
 
 const statusColors = {
   running: "text-green-500",
@@ -58,111 +49,87 @@ type AlertType = {
 } | null;
 
 export default function InstanceControl() {
-  const [tenantId, setTenantId] = useState("");
   const [instances, setInstances] = useState<Instance[]>([]);
-  const [instanceId, setInstanceId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState(null);
-  const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedTenant, setSelectedTenant] = useState("");
+  const [selectedInstances, setSelectedInstances] = useState<string[]>([]);
+  const [action, setAction] = useState<"pause" | "resume">("pause");
   const [alert, setAlert] = useState<AlertType>(null);
 
   useEffect(() => {
-    if (tenantId) {
-      setInstances(instancesByTenant[tenantId] || []);
-      setInstanceId("");
-      setSelectedInstance(null);
-    }
-  }, [tenantId]);
+    fetchInstances();
+  }, []);
 
-  const showAlert = (
-    title: string,
-    description: string,
-    variant: "default" | "destructive" | "warning" = "default"
-  ) => {
-    setAlert({ title, description, variant });
-    setTimeout(() => setAlert(null), 5000); // hide alert after 5 seconds
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!instanceId) {
-      showAlert("Error", "Please select an instance", "destructive");
-      return;
-    }
-
-    const selectedInstanceData = instances.find(
-      (instance) => instance.id === instanceId
-    );
-    if (!selectedInstanceData) {
-      showAlert("Error", "Invalid instance selected", "destructive");
-      return;
-    }
-
-    if (selectedInstanceData.status === "resuming") {
-      showAlert(
-        "State Transition Not Allowed",
-        "The instance is currently resuming. Please wait for the process to complete.",
-        "warning"
-      );
-      return;
-    }
-
-    const action =
-      selectedInstanceData.status === "running" ? "pause" : "resume";
-
+  const fetchInstances = async () => {
     setIsLoading(true);
-    setResponse(null);
+    setError(null);
     try {
-      const response = await fetch(
-        `https://api.neo4j.io/v1/instances/${instanceId}/${action}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            //TODO: authentication headers here - read from dotenv
-          },
-        }
-      );
-
+      const response = await fetch("/api/neo4j-proxy");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
-      setResponse(data);
-      showAlert("Success", `Instance ${instanceId} is now ${action}ing.`);
+      console.log("Data received:", data);
+
+      setInstances(data.instances || []);
     } catch (error) {
-      console.error("Error:", error);
-      showAlert(
-        "Error",
-        `Failed to ${action} instance. Please try again.`,
-        "destructive"
-      );
+      console.error("Error fetching instances:", error);
+      setError("Failed to fetch instances. Please try again.");
+      setInstances([]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAlert(null);
+    if (!selectedTenant || selectedInstances.length === 0) {
+      setAlert({
+        title: "Invalid Selection",
+        description: "Please select a tenant and at least one instance.",
+        variant: "warning",
+      });
+      return;
+    }
+
+    // Here you would typically make an API call to perform the action
+    // For now, we'll just show an alert
+    setAlert({
+      title: "Action Submitted",
+      description: `${action.charAt(0).toUpperCase() + action.slice(1)}ing ${
+        selectedInstances.length
+      } instance(s) for tenant ${selectedTenant}`,
+      variant: "default",
+    });
+  };
+  const [tenantId, setTenantId] = useState("");
+  const [instanceId, setInstanceId] = useState("");
+  const [selectedInstance, setSelectedInstance] = useState("");
+  const [response, setResponse] = useState(null);
+
   const handleInstanceSelect = (instance: Instance) => {
-    setSelectedInstance(instance.id === selectedInstance ? null : instance.id);
-    setInstanceId(instance.id === selectedInstance ? "" : instance.id);
+    setSelectedInstance(instance.id);
+    setInstanceId(instance.id);
   };
 
-  const getActionButtonText = (status: string) => {
-    switch (status) {
+  const getActionButtonText = (instanceId: string) => {
+    // console.log("Current instances:", instances);
+    const instance = Array.isArray(instances)
+      ? instances.find((i) => i.id === instanceId)
+      : null;
+    // console.log("Found instance:", instance);
+
+    if (!instance) return "Select an Instance";
+
+    switch (instance.status) {
       case "running":
         return "Pause Instance";
       case "paused":
         return "Resume Instance";
-      case "resuming":
-        return (
-          <>
-            <Ban className="mr-2 h-4 w-4 text-red-500" />
-            Instance Resuming
-          </>
-        );
       default:
-        return "Select Instance";
+        return "Select an Instance";
     }
   };
 
@@ -180,7 +147,7 @@ export default function InstanceControl() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="tenantSelect">Select Tenant ID</Label>
               <Select value={tenantId} onValueChange={setTenantId}>
                 <SelectTrigger>
@@ -194,12 +161,13 @@ export default function InstanceControl() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            {tenantId && (
+            </div> */}
+            {/* {tenantId && ( we will need to add this back in) */}
+            <div className="space-y-2">
+              <Label htmlFor="instanceSelect">Select Instance</Label>
               <div className="space-y-2">
-                <Label htmlFor="instanceSelect">Select Instance</Label>
-                <div className="space-y-2">
-                  {instances.map((instance) => (
+                {instances && instances.length > 0 ? (
+                  instances.map((instance) => (
                     <div
                       key={instance.id}
                       className="flex items-center space-x-2 border-b border-gray-700 pb-2"
@@ -215,19 +183,22 @@ export default function InstanceControl() {
                         className="flex items-center space-x-2"
                       >
                         <span>{instance.id}</span>
-                        <span
-                          className={`font-medium ${
-                            statusColors[instance.status]
-                          }`}
-                        >
-                          ({instance.status})
+                        <span className="font-medium">({instance.name})</span>
+                        <span className={`font-medium ${statusColors[instance.status] || ''}`}>
+                          {instance.status}
+                        </span>
+                        <span className="text-sm text-gray-400">
+                          {instance.memory} | {instance.storage} | {instance.region}
                         </span>
                       </Label>
                     </div>
-                  ))}
-                </div>
+                  ))
+                ) : (
+                  <p>Loading instances...</p>
+                )}
               </div>
-            )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="instanceId">Instance ID</Label>
               <Input
@@ -254,9 +225,7 @@ export default function InstanceControl() {
                   Processing...
                 </>
               ) : (
-                getActionButtonText(
-                  instances.find((i) => i.id === instanceId)?.status || ""
-                )
+                getActionButtonText(instanceId)
               )}
             </Button>
           </form>
