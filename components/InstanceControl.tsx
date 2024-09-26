@@ -56,7 +56,8 @@ export default function InstanceControl() {
   const [selectedInstances, setSelectedInstances] = useState<string[]>([]);
   const [action, setAction] = useState<"pause" | "resume">("pause");
   const [alert, setAlert] = useState<AlertType>(null);
-  const [selectedInstanceDetails, setSelectedInstanceDetails] = useState<any>(null);
+  const [selectedInstanceDetails, setSelectedInstanceDetails] =
+    useState<any>(null);
 
   useEffect(() => {
     fetchInstances();
@@ -71,7 +72,7 @@ export default function InstanceControl() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Data received:", data);
+      //   console.log("Data received:", data);
 
       setInstances(data.instances || []);
     } catch (error) {
@@ -120,7 +121,18 @@ export default function InstanceControl() {
         variant: "default",
       });
       // Optionally, refresh the instances list after action
-      fetchInstances();
+      //   fetchInstances();
+      setInstances(
+        instances.map((instance) =>
+          instance.id === instanceId
+            ? {
+                ...instance,
+                status: data.data.status,
+                lastUpdated: new Date().toISOString(),
+              }
+            : instance
+        )
+      );
     } catch (error) {
       console.error("Error performing action:", error);
       setAlert({
@@ -165,12 +177,27 @@ export default function InstanceControl() {
   const fetchInstanceDetails = async (instanceId: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/aura-instance-details?instanceId=${instanceId}`);
+      const response = await fetch(
+        `/api/aura-instance-details?instanceId=${instanceId}`
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
+      console.log("Fetched instance details:", data.data.status); // Add this line
       setSelectedInstanceDetails(data);
+
+      setInstances(
+        instances.map((instance) =>
+          instance.id === instanceId
+            ? {
+                ...instance,
+                status: data.data.status,
+                lastUpdated: new Date().toISOString(),
+              }
+            : instance
+        )
+      );
     } catch (error) {
       console.error("Error fetching instance details:", error);
       setAlert({
@@ -234,6 +261,9 @@ export default function InstanceControl() {
                       >
                         <span>{instance.id}</span>
                         <span className="font-medium">({instance.name})</span>
+                        <span className="text-sm text-gray-400 mr-2">
+                          Last updated: {instance.lastUpdated || "N/A"}
+                        </span>
                         <span
                           className={`font-medium ${
                             statusColors[instance.status] || ""
@@ -245,8 +275,8 @@ export default function InstanceControl() {
                           {instance.memory} | {instance.storage} |{" "}
                           {instance.region}
                         </span>
-                        <RefreshCw 
-                          className="w-4 h-4 cursor-pointer" 
+                        <RefreshCw
+                          className="w-4 h-4 cursor-pointer"
                           onClick={() => fetchInstanceDetails(instance.id)}
                         />
                       </Label>
