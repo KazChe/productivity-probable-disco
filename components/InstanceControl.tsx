@@ -263,7 +263,7 @@ export default function InstanceControl() {
               </Select>
             </div> */}
             {/* {tenantId && ( we will need to add this back in) */}
-            <div className="space-y-2">
+            <div className="space-y-2 overflow-y-auto max-h-[400]">
               <Label htmlFor="instanceSelect">Select Instance</Label>
               <div className="space-y-2">
                 {instances && instances.length > 0 ? (
@@ -283,15 +283,17 @@ export default function InstanceControl() {
                         className="flex items-center space-x-2"
                       >
                         <span>{instance.id}</span>
-                        <span className="font-medium">({instance.name})</span>
+                        <span className="font-medium text-xs">
+                          ({instance.name})
+                        </span>
                         <span
-                          className={`text-sm font-medium transition-all duration-300 ${
+                          className={`text-xs font-medium transition-all duration-300 ${
                             pulsingInstanceId === instance.id
-                              ? "text-blue-400 scale-110"
+                              ? "text-teal-400 scale-110"
                               : "text-white"
                           }`}
                         >
-                          updated: {instance.lastUpdated || "N/A"}
+                          Last Updated: {instance.lastUpdated || "N/A"}
                         </span>
                         <span
                           className={`font-medium ${
@@ -300,7 +302,7 @@ export default function InstanceControl() {
                         >
                           {instance.status}
                         </span>
-                        <span className="text-sm text-gray-400">
+                        <span className="text-xs text-gray-400">
                           {instance.memory} | {instance.storage} |{" "}
                           {instance.region}
                         </span>
@@ -348,24 +350,26 @@ export default function InstanceControl() {
             </Button>
           </form>
         </div>
-        <Card className="bg-gray-800 text-white-100 ">
-          <CardHeader>
-            <CardTitle>Response</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {selectedInstanceDetails ? (
-              <pre className="text-sm overflow-auto max-h-[300px] p-2 rounded">
-                {JSON.stringify(selectedInstanceDetails, null, 2)}
-              </pre>
-            ) : response ? (
-              <pre className="text-sm overflow-auto max-h-[300px] p-2 rounded">
-                {JSON.stringify(response, null, 2)}
-              </pre>
-            ) : (
-              <p className="text-muted-foreground">No response yet</p>
-            )}
-          </CardContent>
-        </Card>
+        <div>
+          <Card className="bg-gray-800 text-white-100">
+            <CardHeader>
+              <CardTitle>instance details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {selectedInstanceDetails ? (
+                <pre className="text-xs overflow-auto max-h-[300px] p-2 rounded bg-teal-900">
+                  {JSON.stringify(selectedInstanceDetails, null, 2)}
+                </pre>
+              ) : response ? (
+                <pre className="text-xs overflow-auto max-h-[300px] p-2 rounded bg-teal-900">
+                  {JSON.stringify(response, null, 2)}
+                </pre>
+              ) : (
+                <p className="text-muted-foreground">No response yet</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
