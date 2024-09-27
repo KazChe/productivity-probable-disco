@@ -40,6 +40,7 @@ const statusColors = {
   running: "text-green-500",
   paused: "text-yellow-500",
   resuming: "text-blue-500",
+  pausing: "text-red-500",
 };
 
 // Update the AlertType to include "warning"
@@ -59,7 +60,6 @@ export default function InstanceControl() {
   const [alert, setAlert] = useState<AlertType>(null);
   const [selectedInstanceDetails, setSelectedInstanceDetails] =
     useState<any>(null);
-  const [isPulsing, setIsPulsing] = useState(false);
   const [pulsingInstanceId, setPulsingInstanceId] = useState<string | null>(
     null
   );
@@ -86,9 +86,14 @@ export default function InstanceControl() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      //   console.log("Data received:", data);
-
       setInstances(data.instances || []);
+
+      // Fetch details for all instances
+      if (data.instances && data.instances.length > 0) {
+        await Promise.all(
+          data.instances.map((instance) => fetchInstanceDetails(instance.id))
+        );
+      }
     } catch (error) {
       console.error("Error fetching instances:", error);
       setError("Failed to fetch instances. Please try again.");
@@ -202,8 +207,8 @@ export default function InstanceControl() {
       console.log("Fetched instance details:", data.data.status); // Add this line
       setSelectedInstanceDetails(data);
 
-      setInstances(
-        instances.map((instance) =>
+      setInstances((prevInstances) =>
+        prevInstances.map((instance) =>
           instance.id === instanceId
             ? {
                 ...instance,
@@ -214,7 +219,10 @@ export default function InstanceControl() {
         )
       );
     } catch (error) {
-      console.error("Error fetching instance details:", error);
+      console.error(
+        `Error fetching details for instance ${instanceId}:`,
+        error
+      );
       setAlert({
         title: "Fetch Failed",
         description: "Failed to fetch instance details. Please try again.",
