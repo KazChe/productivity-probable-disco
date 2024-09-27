@@ -58,6 +58,7 @@ export default function InstanceControl() {
   const [selectedInstances, setSelectedInstances] = useState<string[]>([]);
   const [action, setAction] = useState<"pause" | "resume">("pause");
   const [alert, setAlert] = useState<AlertType>(null);
+  const [alertTimeout, setAlertTimeout] = useState<NodeJS.Timeout | null>(null);
   const [selectedInstanceDetails, setSelectedInstanceDetails] =
     useState<any>(null);
   const [pulsingInstanceId, setPulsingInstanceId] = useState<string | null>(
@@ -68,6 +69,7 @@ export default function InstanceControl() {
     fetchInstances();
   }, []);
 
+  // clear the pulsing instance after 1 second
   useEffect(() => {
     if (pulsingInstanceId) {
       const timer = setTimeout(() => {
@@ -76,6 +78,16 @@ export default function InstanceControl() {
       return () => clearTimeout(timer);
     }
   }, [pulsingInstanceId]);
+
+  // clear the alert after 5 seconds
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => {
+        setAlert(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [alert]);
 
   const fetchInstances = async () => {
     setIsLoading(true);
@@ -238,6 +250,7 @@ export default function InstanceControl() {
       <h1 className="text-2xl font-bold text-center mb-4">
         Neo4j Aura Instance Control
       </h1>
+      
       {alert && (
         <Alert variant={alert.variant} className="mb-4">
           <AlertTitle>{alert.title}</AlertTitle>
@@ -317,7 +330,8 @@ export default function InstanceControl() {
                   <p>Loading instances...</p>
                 )}
               </div>
-            </div>
+            </div> 
+            {/* end of instance list */}
 
             <div className="space-y-2">
               <Label htmlFor="instanceId">Instance ID</Label>
