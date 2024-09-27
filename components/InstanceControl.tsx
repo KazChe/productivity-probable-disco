@@ -18,6 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Buffer } from "buffer";
 
 type Instance = {
+  lastUpdated: string;
   cdc_enrichment_mode: string;
   cloud_provider: string;
   connection_url: string | null;
@@ -58,10 +59,23 @@ export default function InstanceControl() {
   const [alert, setAlert] = useState<AlertType>(null);
   const [selectedInstanceDetails, setSelectedInstanceDetails] =
     useState<any>(null);
+  const [isPulsing, setIsPulsing] = useState(false);
+  const [pulsingInstanceId, setPulsingInstanceId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     fetchInstances();
   }, []);
+
+  useEffect(() => {
+    if (pulsingInstanceId) {
+      const timer = setTimeout(() => {
+        setPulsingInstanceId(null);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [pulsingInstanceId]);
 
   const fetchInstances = async () => {
     setIsLoading(true);
@@ -176,6 +190,7 @@ export default function InstanceControl() {
 
   const fetchInstanceDetails = async (instanceId: string) => {
     setIsLoading(true);
+    setPulsingInstanceId(instanceId);
     try {
       const response = await fetch(
         `/api/aura-instance-details?instanceId=${instanceId}`
@@ -261,8 +276,14 @@ export default function InstanceControl() {
                       >
                         <span>{instance.id}</span>
                         <span className="font-medium">({instance.name})</span>
-                        <span className="text-sm text-gray-400 mr-2">
-                          Last updated: {instance.lastUpdated || "N/A"}
+                        <span
+                          className={`text-sm font-medium transition-all duration-300 ${
+                            pulsingInstanceId === instance.id
+                              ? "text-blue-400 scale-110"
+                              : "text-white"
+                          }`}
+                        >
+                          updated: {instance.lastUpdated || "N/A"}
                         </span>
                         <span
                           className={`font-medium ${
