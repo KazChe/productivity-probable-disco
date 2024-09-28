@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Ban, RefreshCw } from "lucide-react";
+import { Loader2, Ban, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -20,7 +20,7 @@ import {
   InstanceTableComponent,
   Instance as TableInstance,
 } from "./InstanceTable";
-import { AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils"; // Make sure you have this utility function
 
 // Update the existing Instance type to match the one from InstanceTable
 type Instance = TableInstance;
@@ -34,12 +34,25 @@ const statusColors = {
   pausing: "text-red-500",
 };
 
-// Update the AlertType to include "warning"
+// Update the AlertType to include a 'variant' property
 type AlertType = {
   title: string;
   description: string;
-  variant: "default" | "destructive" | "warning";
+  variant: "default" | "destructive" | "success" | "warning";
 } | null;
+
+const getAlertStyle = (variant: AlertType["variant"]) => {
+  switch (variant) {
+    case "success":
+      return "bg-green-100 border-green-400 text-green-700";
+    case "destructive":
+      return "bg-red-100 border-red-400 text-red-700";
+    case "warning":
+      return "bg-yellow-100 border-yellow-400 text-yellow-700";
+    default:
+      return "bg-blue-100 border-blue-400 text-blue-700";
+  }
+};
 
 export default function InstanceControl() {
   const [instances, setInstances] = useState<Instance[]>([]);
@@ -58,14 +71,6 @@ export default function InstanceControl() {
 
   useEffect(() => {
     fetchInstances();
-
-    // Set a timeout to clear the alert after 5 seconds
-    const timer = setTimeout(() => {
-      setAlert(null);
-    }, 50000);
-
-    // Clean up the timer
-    return () => clearTimeout(timer);
   }, []);
 
   // clear the pulsing instance after 1 second
@@ -83,10 +88,24 @@ export default function InstanceControl() {
     if (alert) {
       const timer = setTimeout(() => {
         setAlert(null);
-      }, 50000);
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [alert]);
+
+  // Update the getIcon function to match AlertType variants
+  const getIcon = (variant: AlertType["variant"]) => {
+    switch (variant) {
+      case "success":
+        return <CheckCircle className="h-4 w-4 mr-2" />;
+      case "destructive":
+        return <XCircle className="h-4 w-4 mr-2" />;
+      case "warning":
+        return <AlertCircle className="h-4 w-4 mr-2" />;
+      default:
+        return <AlertCircle className="h-4 w-4 mr-2" />;
+    }
+  };
 
   const fetchInstances = async () => {
     setIsLoading(true);
@@ -135,7 +154,7 @@ export default function InstanceControl() {
         },
         body: JSON.stringify({
           instanceId: selectedInstance,
-          action: action, // Use the current action state
+          action: action,
         }),
       });
 
@@ -148,7 +167,7 @@ export default function InstanceControl() {
       setAlert({
         title: "Action Successful",
         description: `Instance ${selectedInstance} is being ${action}d.`,
-        variant: "default",
+        variant: "success",
       });
       // Optionally, refresh the instances list after action
       //   fetchInstances();
@@ -251,18 +270,21 @@ export default function InstanceControl() {
       </h1>
 
       {alert && (
-        <div className="fixed top-4 left-1/5 z-50 max-w-sm">
-          <Alert variant={alert.variant} className="flex items-center">
-            <AlertCircle className="h-4 w-4 mr-2" />
-            <div>
-              <AlertTitle className="text-sm font-semibold">
-                {alert.title}
-              </AlertTitle>
-              <AlertDescription className="text-xs">
-                {alert.description}
-              </AlertDescription>
+        <div className="fixed top-4 left-1/5 z-50 max-w-sm w-full">
+          <div
+            className={cn(
+              "border-l-4 p-4 rounded-r",
+              getAlertStyle(alert.variant)
+            )}
+          >
+            <div className="flex items-center">
+              <div className="flex-shrink-0 mr-3">{getIcon(alert.variant)}</div>
+              <div>
+                <p className="font-bold">{alert.title}</p>
+                <p className="text-sm">{alert.description}</p>
+              </div>
             </div>
-          </Alert>
+          </div>
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
