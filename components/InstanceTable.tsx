@@ -1,28 +1,35 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { RefreshCw } from 'lucide-react'
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import React from "react";
+import { RefreshCw } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface Instance {
-  id: string
-  name: string
-  lastUpdated: string
-  status: string
-  memory: string
-  storage: string
-  region: string
+  id: string;
+  name: string;
+  lastUpdated: string;
+  status: string;
+  memory: string;
+  storage: string;
+  region: string;
 }
 
 interface InstanceTableProps {
-  instances: Instance[]
-  selectedInstance: string | null
-  handleInstanceSelect: (instance: Instance) => void
-  fetchInstanceDetails: (id: string) => void
-  pulsingInstanceId: string | null
-  statusColors: Record<string, string>
+  instances: Instance[];
+  selectedInstance: string | null;
+  handleInstanceSelect: (instance: Instance) => void;
+  fetchInstanceDetails: (id: string) => void;
+  pulsingInstanceId: string | null;
+  statusColors: Record<string, string>;
 }
 
 export function InstanceTableComponent({
@@ -31,11 +38,11 @@ export function InstanceTableComponent({
   handleInstanceSelect,
   fetchInstanceDetails,
   pulsingInstanceId,
-  statusColors
+  statusColors,
 }: InstanceTableProps) {
   return (
     <div className="space-y-2 overflow-y-auto max-h-[400px]">
-      <Label htmlFor="instanceSelect">Select Instance</Label>
+      <Label htmlFor="instanceSelect">Start/Pause Instance</Label>
       {instances && instances.length > 0 ? (
         <Table>
           <TableHeader>
@@ -61,7 +68,9 @@ export function InstanceTableComponent({
                   />
                 </TableCell>
                 <TableCell>{instance.id}</TableCell>
-                <TableCell className="font-medium text-xs">{instance.name}</TableCell>
+                <TableCell className="font-medium text-xs">
+                  {instance.name}
+                </TableCell>
                 <TableCell>
                   <span
                     className={`text-xs font-medium transition-all duration-300 ${
@@ -99,5 +108,5 @@ export function InstanceTableComponent({
         <p>Loading instances...</p>
       )}
     </div>
-  )
+  );
 }

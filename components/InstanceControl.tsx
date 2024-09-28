@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Buffer } from "buffer";
-import { InstanceTableComponent, Instance as TableInstance } from "./InstanceTable";
+import {
+  InstanceTableComponent,
+  Instance as TableInstance,
+} from "./InstanceTable";
+import { AlertCircle } from "lucide-react";
 
 // Update the existing Instance type to match the one from InstanceTable
 type Instance = TableInstance;
@@ -54,6 +58,14 @@ export default function InstanceControl() {
 
   useEffect(() => {
     fetchInstances();
+
+    // Set a timeout to clear the alert after 5 seconds
+    const timer = setTimeout(() => {
+      setAlert(null);
+    }, 50000);
+
+    // Clean up the timer
+    return () => clearTimeout(timer);
   }, []);
 
   // clear the pulsing instance after 1 second
@@ -71,7 +83,7 @@ export default function InstanceControl() {
     if (alert) {
       const timer = setTimeout(() => {
         setAlert(null);
-      }, 5000);
+      }, 50000);
       return () => clearTimeout(timer);
     }
   }, [alert]);
@@ -233,16 +245,25 @@ export default function InstanceControl() {
   };
 
   return (
-    <div className="max-w-100 mx-auto p-6 bg-card rounded-lg bg-gray-800 text-white-100">
+    <div className="max-w-100 mx-auto p-6 bg-card rounded-lg bg-gray-800 text-white-100 relative">
       <h1 className="text-2xl font-bold text-center mb-4">
         Neo4j Aura Instance Control
       </h1>
-      
+
       {alert && (
-        <Alert variant={alert.variant} className="mb-4">
-          <AlertTitle>{alert.title}</AlertTitle>
-          <AlertDescription>{alert.description}</AlertDescription>
-        </Alert>
+        <div className="fixed top-4 left-1/5 z-50 max-w-sm">
+          <Alert variant={alert.variant} className="flex items-center">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <div>
+              <AlertTitle className="text-sm font-semibold">
+                {alert.title}
+              </AlertTitle>
+              <AlertDescription className="text-xs">
+                {alert.description}
+              </AlertDescription>
+            </div>
+          </Alert>
+        </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -288,8 +309,11 @@ export default function InstanceControl() {
               disabled={
                 isLoading ||
                 !instanceId ||
-                instances.find((i) => i.id === instanceId)?.status ===
-                  "resuming"
+                (selectedInstance &&
+                  ["resuming", "pausing"].includes(
+                    instances.find((i) => i.id === selectedInstance)?.status ||
+                      ""
+                  ))
               }
             >
               {isLoading ? (
