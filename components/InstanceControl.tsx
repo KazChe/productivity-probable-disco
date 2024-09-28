@@ -14,13 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Buffer } from "buffer";
 import {
   InstanceTableComponent,
   Instance as TableInstance,
 } from "./InstanceTable";
 import { cn } from "@/lib/utils"; // Make sure you have this utility function
+import { Alert, AlertType } from "./Alert";
 
 // Update the existing Instance type to match the one from InstanceTable
 type Instance = TableInstance;
@@ -61,7 +62,7 @@ export default function InstanceControl() {
   const [selectedTenant, setSelectedTenant] = useState("");
   const [selectedInstances, setSelectedInstances] = useState<string[]>([]);
   const [action, setAction] = useState<"pause" | "resume">("pause");
-  const [alert, setAlert] = useState<AlertType>(null);
+  const [alert, setAlert] = useState<AlertType | null>(null);
   const [alertTimeout, setAlertTimeout] = useState<NodeJS.Timeout | null>(null);
   const [selectedInstanceDetails, setSelectedInstanceDetails] =
     useState<any>(null);
@@ -269,43 +270,11 @@ export default function InstanceControl() {
         Neo4j Aura Instance Control
       </h1>
 
-      {alert && (
-        <div className="fixed top-4 left-1/5 z-50 max-w-sm w-full">
-          <div
-            className={cn(
-              "border-l-4 p-4 rounded-r",
-              getAlertStyle(alert.variant)
-            )}
-          >
-            <div className="flex items-center">
-              <div className="flex-shrink-0 mr-3">{getIcon(alert.variant)}</div>
-              <div>
-                <p className="font-bold">{alert.title}</p>
-                <p className="text-sm">{alert.description}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {alert && <Alert alert={alert} />}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* <div className="space-y-2">
-              <Label htmlFor="tenantSelect">Select Tenant ID</Label>
-              <Select value={tenantId} onValueChange={setTenantId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a tenant" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tenants.map((tenant) => (
-                    <SelectItem key={tenant.id} value={tenant.id}>
-                      {tenant.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div> */}
-            {/* {tenantId && ( we will need to add this back in) */}
             <InstanceTableComponent
               instances={instances}
               selectedInstance={selectedInstance}
