@@ -32,11 +32,18 @@ interface InstanceActionProps {
 // New component for instance actions
 const InstanceActions: React.FC<InstanceActionProps> = React.memo(({ instance, handleInstanceAction, fetchInstanceDetails }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleAction = async (action: "pause" | "resume") => {
     setIsLoading(true);
     await handleInstanceAction(instance, action);
     setIsLoading(false);
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchInstanceDetails(instance.id);
+    setTimeout(() => setIsRefreshing(false), 1000); // Keep spinning for 1 second after fetch
   };
 
   return (
@@ -53,11 +60,11 @@ const InstanceActions: React.FC<InstanceActionProps> = React.memo(({ instance, h
       <Button
         size="xs" // Changed from "sm" to "xs"
         variant="outline"
-        onClick={() => fetchInstanceDetails(instance.id)}
+        onClick={handleRefresh}
         disabled={isLoading}
         className="p-1" // Added padding to make the button slightly larger than the icon
       >
-        <RefreshCw className="h-3 w-3" />
+        <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
       </Button>
     </div>
   );
@@ -82,7 +89,7 @@ export function InstanceTableComponent({
 }: InstanceTableProps) {
   return (
     <div className="space-y-2 overflow-y-auto max-h-[400px]">
-      <Label htmlFor="instanceSelect">Instance Control</Label>
+      <Label htmlFor="instanceSelect">Instances</Label>
       {instances && instances.length > 0 ? (
         <Table>
           <TableHeader>
