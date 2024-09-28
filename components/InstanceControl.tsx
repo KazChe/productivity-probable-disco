@@ -16,23 +16,10 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Buffer } from "buffer";
+import { InstanceTableComponent, Instance as TableInstance } from "./InstanceTable";
 
-type Instance = {
-  lastUpdated: string;
-  cdc_enrichment_mode: string;
-  cloud_provider: string;
-  connection_url: string | null;
-  id: string;
-  memory: string;
-  metrics_integration_url: string;
-  name: string;
-  region: string;
-  secondaries_count: number;
-  status: string;
-  storage: string;
-  tenant_id: string;
-  type: string;
-};
+// Update the existing Instance type to match the one from InstanceTable
+type Instance = TableInstance;
 
 type InstancesByTenant = { [key: string]: Instance[] };
 
@@ -276,62 +263,14 @@ export default function InstanceControl() {
               </Select>
             </div> */}
             {/* {tenantId && ( we will need to add this back in) */}
-            <div className="space-y-2 overflow-y-auto max-h-[400]">
-              <Label htmlFor="instanceSelect">Select Instance</Label>
-              <div className="space-y-2">
-                {instances && instances.length > 0 ? (
-                  instances.map((instance) => (
-                    <div
-                      key={instance.id}
-                      className="flex items-center space-x-2 border-b border-gray-700 pb-2"
-                    >
-                      <Checkbox
-                        className="border-white-100"
-                        id={instance.id}
-                        checked={selectedInstance === instance.id}
-                        onCheckedChange={() => handleInstanceSelect(instance)}
-                      />
-                      <Label
-                        htmlFor={instance.id}
-                        className="flex items-center space-x-2"
-                      >
-                        <span>{instance.id}</span>
-                        <span className="font-medium text-xs">
-                          ({instance.name})
-                        </span>
-                        <span
-                          className={`text-xs font-medium transition-all duration-300 ${
-                            pulsingInstanceId === instance.id
-                              ? "text-teal-400 scale-110"
-                              : "text-white"
-                          }`}
-                        >
-                          Last Updated: {instance.lastUpdated || "N/A"}
-                        </span>
-                        <span
-                          className={`font-medium ${
-                            statusColors[instance.status] || ""
-                          }`}
-                        >
-                          {instance.status}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          {instance.memory} | {instance.storage} |{" "}
-                          {instance.region}
-                        </span>
-                        <RefreshCw
-                          className="w-4 h-4 cursor-pointer"
-                          onClick={() => fetchInstanceDetails(instance.id)}
-                        />
-                      </Label>
-                    </div>
-                  ))
-                ) : (
-                  <p>Loading instances...</p>
-                )}
-              </div>
-            </div> 
-            {/* end of instance list */}
+            <InstanceTableComponent
+              instances={instances}
+              selectedInstance={selectedInstance}
+              handleInstanceSelect={handleInstanceSelect}
+              fetchInstanceDetails={fetchInstanceDetails}
+              pulsingInstanceId={pulsingInstanceId}
+              statusColors={statusColors}
+            />
 
             <div className="space-y-2">
               <Label htmlFor="instanceId">Instance ID</Label>
