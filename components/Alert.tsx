@@ -5,14 +5,14 @@ import { cn } from "@/lib/utils";
 export type AlertType = {
   title: string;
   description: string;
-  variant: "default" | "destructive" | "success" | "warning";
+  variant: "default" | "failure" | "success" | "warning";
 };
 
 const getAlertStyle = (variant: AlertType["variant"]) => {
   switch (variant) {
     case "success":
       return "bg-green-100 border-green-400 text-green-700";
-    case "destructive":
+    case "failure":
       return "bg-red-100 border-red-400 text-red-700";
     case "warning":
       return "bg-yellow-100 border-yellow-400 text-yellow-700";
@@ -25,7 +25,7 @@ const getIcon = (variant: AlertType["variant"]) => {
   switch (variant) {
     case "success":
       return <CheckCircle className="h-5 w-5" />;
-    case "destructive":
+    case "failure":
       return <XCircle className="h-5 w-5" />;
     case "warning":
       return <AlertCircle className="h-5 w-5" />;

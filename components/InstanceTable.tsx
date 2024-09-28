@@ -25,56 +25,76 @@ export interface Instance {
 
 interface InstanceActionProps {
   instance: Instance;
-  handleInstanceAction: (instance: Instance, action: "pause" | "resume") => void;
+  handleInstanceAction: (
+    instance: Instance,
+    action: "pause" | "resume"
+  ) => void;
   fetchInstanceDetails: (id: string) => void;
 }
 
 // New component for instance actions
-const InstanceActions: React.FC<InstanceActionProps> = React.memo(({ instance, handleInstanceAction, fetchInstanceDetails }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+const InstanceActions: React.FC<InstanceActionProps> = React.memo(
+  ({ instance, handleInstanceAction, fetchInstanceDetails }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleAction = async (action: "pause" | "resume") => {
-    setIsLoading(true);
-    await handleInstanceAction(instance, action);
-    setIsLoading(false);
-  };
+    const handleAction = async (action: "pause" | "resume") => {
+      setIsLoading(true);
+      await handleInstanceAction(instance, action);
+      setIsLoading(false);
+    };
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await fetchInstanceDetails(instance.id);
-    setTimeout(() => setIsRefreshing(false), 1000); // Keep spinning for 1 second after fetch
-  };
+    const handleRefresh = async () => {
+      setIsRefreshing(true);
+      await fetchInstanceDetails(instance.id);
+      setTimeout(() => setIsRefreshing(false), 1000); // Keep spinning for 1 second after fetch
+    };
 
-  return (
-    <div className="flex space-x-1"> {/* Reduced space between buttons */}
-      <Button
-        size="xs" // Changed from "sm" to "xs"
-        variant="outline"
-        onClick={() => handleAction(instance.status === "running" ? "pause" : "resume")}
-        disabled={isLoading || ["resuming", "pausing"].includes(instance.status)}
-        className="p-1" // Added padding to make the button slightly larger than the icon
-      >
-        {instance.status === "running" ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-      </Button>
-      <Button
-        size="xs" // Changed from "sm" to "xs"
-        variant="outline"
-        onClick={handleRefresh}
-        disabled={isLoading}
-        className="p-1" // Added padding to make the button slightly larger than the icon
-      >
-        <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-      </Button>
-    </div>
-  );
-});
+    return (
+      <div className="flex space-x-1">
+        {" "}
+        {/* Reduced space between buttons */}
+        <Button
+          size="xs" // Changed from "sm" to "xs"
+          variant="outline"
+          onClick={() =>
+            handleAction(instance.status === "running" ? "pause" : "resume")
+          }
+          disabled={
+            isLoading || ["resuming", "pausing"].includes(instance.status)
+          }
+          className="p-1" // Added padding to make the button slightly larger than the icon
+        >
+          {instance.status === "running" ? (
+            <Pause className="h-3 w-3" />
+          ) : (
+            <Play className="h-3 w-3" />
+          )}
+        </Button>
+        <Button
+          size="xs" // Changed from "sm" to "xs"
+          variant="outline"
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className="p-1" // Added padding to make the button slightly larger than the icon
+        >
+          <RefreshCw
+            className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`}
+          />
+        </Button>
+      </div>
+    );
+  }
+);
 
-InstanceActions.displayName = 'InstanceActions';
+InstanceActions.displayName = "InstanceActions";
 
 interface InstanceTableProps {
   instances: Instance[];
-  handleInstanceAction: (instance: Instance, action: "pause" | "resume") => void;
+  handleInstanceAction: (
+    instance: Instance,
+    action: "pause" | "resume"
+  ) => void;
   fetchInstanceDetails: (id: string) => void;
   pulsingInstanceId: string | null;
   statusColors: Record<string, string>;
@@ -88,7 +108,9 @@ export function InstanceTableComponent({
   statusColors,
 }: InstanceTableProps) {
   return (
-    <div className="space-y-2 overflow-y-auto max-h-[400px]">
+    <div className="space-y-2 overflow-y-auto h-full relative bg-gray-900">
+      {" "}
+      {/* Changed max-h-[400px] to h-full, added bg-gray-900 */}
       <Label htmlFor="instanceSelect">Instances</Label>
       {instances && instances.length > 0 ? (
         <Table>
@@ -146,6 +168,7 @@ export function InstanceTableComponent({
       ) : (
         <p>Loading instances...</p>
       )}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
     </div>
   );
 }

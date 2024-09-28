@@ -117,7 +117,10 @@ export default function InstanceControl() {
     }
   };
 
-  const handleInstanceAction = async (instance: Instance, action: "pause" | "resume") => {
+  const handleInstanceAction = async (
+    instance: Instance,
+    action: "pause" | "resume"
+  ) => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/aura-instance-actions", {
@@ -141,7 +144,7 @@ export default function InstanceControl() {
         description: `Instance ${instance.id} is being ${action}d.`,
         variant: "success",
       });
-      
+
       setInstances(
         instances.map((i) =>
           i.id === instance.id
@@ -153,7 +156,7 @@ export default function InstanceControl() {
             : i
         )
       );
-      
+
       setTimeout(() => fetchInstanceDetails(instance.id), 5000);
     } catch (error) {
       console.error("Error performing action:", error);
@@ -216,7 +219,7 @@ export default function InstanceControl() {
       {alert && <Alert alert={alert} />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
+        <div className="h-[500px] overflow-hidden bg-gray-900"> {/* Added bg-gray-900 */}
           <InstanceTableComponent
             instances={instances}
             handleInstanceAction={handleInstanceAction}
