@@ -74,7 +74,6 @@ export default function InstanceControl() {
     fetchInstances();
   }, []);
 
-  // clear the pulsing instance after 1 second
   useEffect(() => {
     if (pulsingInstanceId) {
       const timer = setTimeout(() => {
@@ -84,7 +83,6 @@ export default function InstanceControl() {
     }
   }, [pulsingInstanceId]);
 
-  // clear the alert after 5 seconds
   useEffect(() => {
     if (alert) {
       const timer = setTimeout(() => {
@@ -93,20 +91,6 @@ export default function InstanceControl() {
       return () => clearTimeout(timer);
     }
   }, [alert]);
-
-  // Update the getIcon function to match AlertType variants
-  const getIcon = (variant: AlertType["variant"]) => {
-    switch (variant) {
-      case "success":
-        return <CheckCircle className="h-4 w-4 mr-2" />;
-      case "destructive":
-        return <XCircle className="h-4 w-4 mr-2" />;
-      case "warning":
-        return <AlertCircle className="h-4 w-4 mr-2" />;
-      default:
-        return <AlertCircle className="h-4 w-4 mr-2" />;
-    }
-  };
 
   const fetchInstances = async () => {
     setIsLoading(true);
@@ -119,7 +103,6 @@ export default function InstanceControl() {
       const data = await response.json();
       setInstances(data.instances || []);
 
-      // Fetch details for all instances
       if (data.instances && data.instances.length > 0) {
         await Promise.all(
           data.instances.map((instance) => fetchInstanceDetails(instance.id))
@@ -134,18 +117,7 @@ export default function InstanceControl() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAlert(null);
-    if (!selectedInstance) {
-      setAlert({
-        title: "Invalid Selection",
-        description: "Please select an instance.",
-        variant: "warning",
-      });
-      return;
-    }
-
+  const handleInstanceAction = async (instance: Instance, action: "pause" | "resume") => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/aura-instance-actions", {
@@ -154,7 +126,7 @@ export default function InstanceControl() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          instanceId: selectedInstance,
+          instanceId: instance.id,
           action: action,
         }),
       });
@@ -164,25 +136,25 @@ export default function InstanceControl() {
       }
 
       const data = await response.json();
-      setResponse(data);
       setAlert({
         title: "Action Successful",
-        description: `Instance ${selectedInstance} is being ${action}d.`,
+        description: `Instance ${instance.id} is being ${action}d.`,
         variant: "success",
       });
-      // Optionally, refresh the instances list after action
-      //   fetchInstances();
+      
       setInstances(
-        instances.map((instance) =>
-          instance.id === instanceId
+        instances.map((i) =>
+          i.id === instance.id
             ? {
-                ...instance,
-                status: data.data.status,
+                ...i,
+                status: action === "pause" ? "pausing" : "resuming",
                 lastUpdated: new Date().toISOString(),
               }
-            : instance
+            : i
         )
       );
+      
+      setTimeout(() => fetchInstanceDetails(instance.id), 5000);
     } catch (error) {
       console.error("Error performing action:", error);
       setAlert({
@@ -192,35 +164,6 @@ export default function InstanceControl() {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const [tenantId, setTenantId] = useState("");
-  const [instanceId, setInstanceId] = useState("");
-  const [selectedInstance, setSelectedInstance] = useState("");
-  const [response, setResponse] = useState(null);
-
-  const handleInstanceSelect = (instance: Instance) => {
-    setSelectedInstance(instance.id);
-    setInstanceId(instance.id);
-    // Set the action based on the current status of the instance
-    setAction(instance.status === "running" ? "pause" : "resume");
-  };
-
-  const getActionButtonText = (instanceId: string) => {
-    const instance = Array.isArray(instances)
-      ? instances.find((i) => i.id === instanceId)
-      : null;
-
-    if (!instance) return "Select an Instance";
-
-    switch (instance.status) {
-      case "running":
-        return "Pause Instance";
-      case "paused":
-        return "Resume Instance";
-      default:
-        return "Select an Instance";
     }
   };
 
@@ -235,7 +178,7 @@ export default function InstanceControl() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Fetched instance details:", data.data.status); // Add this line
+      console.log("Fetched instance details:", data.data.status);
       setSelectedInstanceDetails(data);
 
       setInstances((prevInstances) =>
@@ -274,66 +217,27 @@ export default function InstanceControl() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <InstanceTableComponent
-              instances={instances}
-              selectedInstance={selectedInstance}
-              handleInstanceSelect={handleInstanceSelect}
-              fetchInstanceDetails={fetchInstanceDetails}
-              pulsingInstanceId={pulsingInstanceId}
-              statusColors={statusColors}
-            />
-
-            <div className="space-y-2">
-              <Label htmlFor="instanceId">Instance ID</Label>
-              <Input
-                id="instanceId"
-                value={instanceId}
-                readOnly
-                className="bg-gray-700"
-                placeholder="Selected instance ID will appear here"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={
-                isLoading ||
-                !instanceId ||
-                (selectedInstance &&
-                  ["resuming", "pausing"].includes(
-                    instances.find((i) => i.id === selectedInstance)?.status ||
-                      ""
-                  ))
-              }
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                getActionButtonText(instanceId)
-              )}
-            </Button>
-          </form>
+          <InstanceTableComponent
+            instances={instances}
+            handleInstanceAction={handleInstanceAction}
+            fetchInstanceDetails={fetchInstanceDetails}
+            pulsingInstanceId={pulsingInstanceId}
+            statusColors={statusColors}
+            isLoading={isLoading}
+          />
         </div>
         <div>
           <Card className="bg-gray-800 text-white-100">
             <CardHeader>
-              <CardTitle>instance details</CardTitle>
+              <CardTitle>Instance Details</CardTitle>
             </CardHeader>
             <CardContent>
               {selectedInstanceDetails ? (
                 <pre className="text-xs overflow-auto max-h-[300px] p-2 rounded bg-teal-900">
                   {JSON.stringify(selectedInstanceDetails, null, 2)}
                 </pre>
-              ) : response ? (
-                <pre className="text-xs overflow-auto max-h-[300px] p-2 rounded bg-teal-900">
-                  {JSON.stringify(response, null, 2)}
-                </pre>
               ) : (
-                <p className="text-muted-foreground">No response yet</p>
+                <p className="text-muted-foreground">No instance selected</p>
               )}
             </CardContent>
           </Card>

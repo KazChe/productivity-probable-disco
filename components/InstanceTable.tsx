@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { RefreshCw } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import React, { useState } from "react";
+import { RefreshCw, Pause, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Table,
@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface Instance {
+export interface Instance {
   id: string;
   name: string;
   lastUpdated: string;
@@ -23,10 +23,51 @@ interface Instance {
   region: string;
 }
 
+interface InstanceActionProps {
+  instance: Instance;
+  handleInstanceAction: (instance: Instance, action: "pause" | "resume") => void;
+  fetchInstanceDetails: (id: string) => void;
+}
+
+// New component for instance actions
+const InstanceActions: React.FC<InstanceActionProps> = React.memo(({ instance, handleInstanceAction, fetchInstanceDetails }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleAction = async (action: "pause" | "resume") => {
+    setIsLoading(true);
+    await handleInstanceAction(instance, action);
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="flex space-x-1"> {/* Reduced space between buttons */}
+      <Button
+        size="xs" // Changed from "sm" to "xs"
+        variant="outline"
+        onClick={() => handleAction(instance.status === "running" ? "pause" : "resume")}
+        disabled={isLoading || ["resuming", "pausing"].includes(instance.status)}
+        className="p-1" // Added padding to make the button slightly larger than the icon
+      >
+        {instance.status === "running" ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+      </Button>
+      <Button
+        size="xs" // Changed from "sm" to "xs"
+        variant="outline"
+        onClick={() => fetchInstanceDetails(instance.id)}
+        disabled={isLoading}
+        className="p-1" // Added padding to make the button slightly larger than the icon
+      >
+        <RefreshCw className="h-3 w-3" />
+      </Button>
+    </div>
+  );
+});
+
+InstanceActions.displayName = 'InstanceActions';
+
 interface InstanceTableProps {
   instances: Instance[];
-  selectedInstance: string | null;
-  handleInstanceSelect: (instance: Instance) => void;
+  handleInstanceAction: (instance: Instance, action: "pause" | "resume") => void;
   fetchInstanceDetails: (id: string) => void;
   pulsingInstanceId: string | null;
   statusColors: Record<string, string>;
@@ -34,39 +75,29 @@ interface InstanceTableProps {
 
 export function InstanceTableComponent({
   instances,
-  selectedInstance,
-  handleInstanceSelect,
+  handleInstanceAction,
   fetchInstanceDetails,
   pulsingInstanceId,
   statusColors,
 }: InstanceTableProps) {
   return (
     <div className="space-y-2 overflow-y-auto max-h-[400px]">
-      <Label htmlFor="instanceSelect">Start/Pause Instance</Label>
+      <Label htmlFor="instanceSelect">Instance Control</Label>
       {instances && instances.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]"></TableHead>
               <TableHead>ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Last Updated</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Specs</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {instances.map((instance) => (
               <TableRow key={instance.id}>
-                <TableCell>
-                  <Checkbox
-                    className="border-white-100"
-                    id={instance.id}
-                    checked={selectedInstance === instance.id}
-                    onCheckedChange={() => handleInstanceSelect(instance)}
-                  />
-                </TableCell>
                 <TableCell>{instance.id}</TableCell>
                 <TableCell className="font-medium text-xs">
                   {instance.name}
@@ -95,9 +126,10 @@ export function InstanceTableComponent({
                   {instance.memory} | {instance.storage} | {instance.region}
                 </TableCell>
                 <TableCell>
-                  <RefreshCw
-                    className="w-4 h-4 cursor-pointer"
-                    onClick={() => fetchInstanceDetails(instance.id)}
+                  <InstanceActions
+                    instance={instance}
+                    handleInstanceAction={handleInstanceAction}
+                    fetchInstanceDetails={fetchInstanceDetails}
                   />
                 </TableCell>
               </TableRow>
