@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { RefreshCw, Pause, Play } from "lucide-react";
+import { RefreshCw, Pause, Play, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -53,9 +53,8 @@ const InstanceActions: React.FC<InstanceActionProps> = React.memo(
     return (
       <div className="flex space-x-1">
         {" "}
-        {/* Reduced space between buttons */}
         <Button
-          size="xs" // Changed from "sm" to "xs"
+          size="xs"
           variant="outline"
           onClick={() =>
             handleAction(instance.status === "running" ? "pause" : "resume")
@@ -98,6 +97,8 @@ interface InstanceTableProps {
   fetchInstanceDetails: (id: string) => void;
   pulsingInstanceId: string | null;
   statusColors: Record<string, string>;
+  isLoading: boolean;
+  handleDeleteInstance: (instance: Instance) => void;
 }
 
 export function InstanceTableComponent({
@@ -106,11 +107,11 @@ export function InstanceTableComponent({
   fetchInstanceDetails,
   pulsingInstanceId,
   statusColors,
+  isLoading,
+  handleDeleteInstance,
 }: InstanceTableProps) {
   return (
     <div className="space-y-2 overflow-y-auto h-full relative bg-gray-900">
-      {" "}
-      {/* Changed max-h-[400px] to h-full, added bg-gray-900 */}
       <Label htmlFor="instanceSelect">Instances</Label>
       {instances && instances.length > 0 ? (
         <Table>
@@ -121,7 +122,7 @@ export function InstanceTableComponent({
               <TableHead>Last Updated</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Specs</TableHead>
-              <TableHead className="w-[120px]">Actions</TableHead>
+              <TableHead className="w-[180px]">Actions</TableHead> {/* Increased width to accommodate new button */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -155,11 +156,21 @@ export function InstanceTableComponent({
                   {instance.memory} | {instance.storage} | {instance.region}
                 </TableCell>
                 <TableCell>
-                  <InstanceActions
-                    instance={instance}
-                    handleInstanceAction={handleInstanceAction}
-                    fetchInstanceDetails={fetchInstanceDetails}
-                  />
+                  <div className="flex space-x-1"> {/* Reduced space between buttons */}
+                    <Button
+                      variant="destructive"
+                      size="xs" // Changed to match InstanceActions buttons
+                      onClick={() => handleDeleteInstance(instance)}
+                      className="p-1" // Added padding to make the button slightly larger than the icon
+                    >
+                      <Trash className="h-3 w-3" /> {/* Adjusted icon size */}
+                    </Button>
+                    <InstanceActions
+                      instance={instance}
+                      handleInstanceAction={handleInstanceAction}
+                      fetchInstanceDetails={fetchInstanceDetails}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

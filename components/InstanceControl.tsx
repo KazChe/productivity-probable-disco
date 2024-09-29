@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Ban, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -22,6 +21,15 @@ import {
 } from "./InstanceTable";
 import { cn } from "@/lib/utils"; // Make sure you have this utility function
 import { Alert, AlertType } from "./Alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 // Update the existing Instance type to match the one from InstanceTable
 type Instance = TableInstance;
@@ -69,6 +77,10 @@ export default function InstanceControl() {
   const [pulsingInstanceId, setPulsingInstanceId] = useState<string | null>(
     null
   );
+  const [instanceToDelete, setInstanceToDelete] = useState<Instance | null>(
+    null
+  );
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchInstances();
@@ -210,6 +222,16 @@ export default function InstanceControl() {
     }
   };
 
+  const handleDeleteInstance = async (instance: Instance) => {
+    // Implement the delete logic here
+    console.log(`Deleting instance ${instance.id}`);
+    // Close the dialog
+    setIsDeleteDialogOpen(false);
+    setInstanceToDelete(null);
+    // TODO: You would typically make an API call here to delete the instance
+    // After successful deletion, update the instances list and show a success alert
+  };
+
   return (
     <div className="max-w-100 mx-auto p-6 bg-card rounded-lg bg-gray-800 text-white-100 relative">
       <h1 className="text-2xl font-bold text-center mb-4">
@@ -219,7 +241,7 @@ export default function InstanceControl() {
       {alert && <Alert alert={alert} />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="h-[500px] overflow-hidden bg-gray-900"> {/* Added bg-gray-900 */}
+        <div className="h-[500px] overflow-hidden bg-gray-900">
           <InstanceTableComponent
             instances={instances}
             handleInstanceAction={handleInstanceAction}
@@ -227,6 +249,10 @@ export default function InstanceControl() {
             pulsingInstanceId={pulsingInstanceId}
             statusColors={statusColors}
             isLoading={isLoading}
+            handleDeleteInstance={(instance) => {
+              setInstanceToDelete(instance);
+              setIsDeleteDialogOpen(true);
+            }}
           />
         </div>
         <div>
@@ -246,6 +272,25 @@ export default function InstanceControl() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the instance {instanceToDelete?.id}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => handleDeleteInstance(instanceToDelete!)}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

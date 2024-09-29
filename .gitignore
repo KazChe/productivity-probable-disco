@@ -40,3 +40,7 @@ next-env.d.ts
 # Environment   
 .env
 .dotenv
+
+# misk
+.DS_Store
+/Architecture
