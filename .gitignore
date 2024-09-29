@@ -44,3 +44,26 @@ next-env.d.ts
 # misk
 .DS_Store
 /Architecture
+
+# java spring boot
+*.jar
+*.war
+*.ear
+*.zip
+*.rar
+*.7z
+*.tar
+
+*.gz
+*.bz2
+*.xz
+*.lwp
+*.z
+*.cab
+*.iso
+*.img
+*.vhd
+*.vhdx
+*.vdi
+
+
