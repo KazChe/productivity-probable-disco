@@ -12,6 +12,7 @@ import {
 import TodaysNews from "./TodaysNews";
 import OOMMetricDashboard from "./OOMMetricDashboard";
 import InstanceControl from "./InstanceControl";
+import Image from "next/image";
 
 type Message = {
   role: "user" | "assistant";
@@ -119,11 +120,16 @@ export default function ProductivityTool() {
               </div>
               <div
                 className="flex items-center justify-between cursor-pointer hover:text-gray-200"
-                onClick={() => setSelectedItem("Neo4j Aura Instance Control")}
+                onClick={() => setSelectedItem("Neo4j Aura Instance")}
               >
-                {/* TODO: fix css */}
-                <span>Neo4j Aura Instance Control</span>
-                <CloudCogIcon className="w-4 h-4" />
+                <span>Neo4j Aura Instance</span>
+                <Image
+                  src="/images/neologo.png"
+                  alt="Neo4j Aura Instance"
+                  width={16}
+                  height={16}
+                  className="rounded-full opacity-50"
+                />
               </div>
             </div>
           </div>
@@ -213,7 +219,7 @@ export default function ProductivityTool() {
           <div className="flex-1 p-4">
             <OOMMetricDashboard />
           </div>
-        ) : selectedItem === "Neo4j Aura Instance Control" ? (
+        ) : selectedItem === "Neo4j Aura Instance" ? (
           <div className="flex-1 p-4">
             <InstanceControl />
           </div>
