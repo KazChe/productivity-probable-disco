@@ -2,19 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Buffer } from "buffer";
 import {
   InstanceTableComponent,
   Instance as TableInstance,
@@ -27,14 +15,13 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogTitle
 } from "@/components/ui/dialog";
 
 // Update the existing Instance type to match the one from InstanceTable
 type Instance = TableInstance;
 
-type InstancesByTenant = { [key: string]: Instance[] };
+// type InstancesByTenant = { [key: string]: Instance[] };
 
 const statusColors = {
   running: "text-green-500",
@@ -44,11 +31,11 @@ const statusColors = {
 };
 
 // Update the AlertType to include a 'variant' property
-type AlertType = {
-  title: string;
-  description: string;
-  variant: "default" | "destructive" | "success" | "warning";
-} | null;
+// type AlertType = {
+//   title: string;
+//   description: string;
+//   variant: "default" | "destructive" | "success" | "warning";
+// } | null;
 
 const getAlertStyle = (variant: AlertType["variant"]) => {
   switch (variant) {
@@ -253,6 +240,7 @@ export default function InstanceControl() {
               setInstanceToDelete(instance);
               setIsDeleteDialogOpen(true);
             }}
+            allowedAuraInstance={process.env.ALLOWED_AURA_INSTANCE}
           />
         </div>
         <div>
