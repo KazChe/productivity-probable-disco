@@ -92,8 +92,6 @@ export default function ProductivityTool() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <span className="w-4 h-4 border border-gray-600 rounded-sm"></span>
-                <span>Playground</span>
               </div>
             </div>
             <div className="pl-6 space-y-2 text-sm text-gray-500">
