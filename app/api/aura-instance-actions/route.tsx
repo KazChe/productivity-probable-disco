@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getAuraAccessToken } from "@/lib/auth";
 const API_BASE_URL = process.env.API_BASE_URL;
 
-
 async function performInstanceAction(
   instanceId: string,
   action: "resume" | "pause"
@@ -15,6 +14,7 @@ async function performInstanceAction(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
+        "Cache-Control": "no-cache",
       },
     }
   );

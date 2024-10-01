@@ -15,7 +15,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 
 // Update the existing Instance type to match the one from InstanceTable
@@ -29,13 +29,6 @@ const statusColors = {
   resuming: "text-blue-500",
   pausing: "text-red-500",
 };
-
-// Update the AlertType to include a 'variant' property
-// type AlertType = {
-//   title: string;
-//   description: string;
-//   variant: "default" | "destructive" | "success" | "warning";
-// } | null;
 
 const getAlertStyle = (variant: AlertType["variant"]) => {
   switch (variant) {
@@ -110,7 +103,6 @@ export default function InstanceControl() {
     } catch (error) {
       console.error("Error fetching instances:", error);
       setError("Failed to fetch instances. Please try again.");
-      setInstances([]);
     } finally {
       setIsLoading(false);
     }
@@ -266,14 +258,21 @@ export default function InstanceControl() {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the instance {instanceToDelete?.id}? This action cannot be undone.
+              Are you sure you want to delete the instance{" "}
+              {instanceToDelete?.id}? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={() => handleDeleteInstance(instanceToDelete!)}>
+            <Button
+              variant="destructive"
+              onClick={() => handleDeleteInstance(instanceToDelete!)}
+            >
               Delete
             </Button>
           </DialogFooter>
