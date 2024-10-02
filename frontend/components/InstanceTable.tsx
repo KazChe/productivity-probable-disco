@@ -122,7 +122,7 @@ export function InstanceTableComponent({
               <TableHead>Last Updated</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Specs</TableHead>
-              <TableHead className="w-[180px]">Actions</TableHead> {/* Increased width to accommodate new button */}
+              <TableHead className="w-[160px]">Actions</TableHead> {/* Increased width to accommodate new button */}
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -97,16 +97,7 @@ export default function InstanceControl() {
 
       if (data.instances && data.instances.length > 0) {
         await Promise.all(
-          validInstances.map(async (instance) => {
-            try {
-              await fetchInstanceDetails(instance.id);
-            } catch (error) {
-              console.error(
-                `Error fetching details for instance ${instance.id}:`,
-                error
-              );
-            }
-          })
+          data.instances.map((instance) => fetchInstanceDetails(instance.id))
         );
       }
     } catch (error) {
