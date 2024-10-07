@@ -91,8 +91,7 @@ export default function ProductivityTool() {
         <div className="p-4 flex-grow">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-              </div>
+              <div className="flex items-center space-x-2"></div>
             </div>
             <div className="pl-6 space-y-2 text-sm text-gray-500">
               <div
@@ -109,13 +108,13 @@ export default function ProductivityTool() {
                 <span>Save to Vector DB</span>
                 <Database className="w-4 h-4" />
               </div>
-              <div
+              {/* <div
                 className="flex items-center justify-between cursor-pointer hover:text-gray-200"
                 onClick={() => setSelectedItem("OOM Metric Dashboard")}
               >
                 <span>Metrics Dashboard</span>
                 <BarChart className="w-4 h-4" />
-              </div>
+              </div> */}
               <div
                 className="flex items-center justify-between cursor-pointer hover:text-gray-200"
                 onClick={() => setSelectedItem("Neo4j Aura Instance")}
