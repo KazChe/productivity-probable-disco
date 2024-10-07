@@ -24,8 +24,13 @@ async function fetchInstanceDetails(instanceId: string, accessToken: string) {
 }
 
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const requestId = searchParams.get('requestId');
+  console.log(`GET request received for /api/neo4j-proxy. Request ID: ${requestId}`);
+  
   try {
     const accessToken = await getAuraAccessToken();
+    console.log("Access token obtained");
 
     console.log("Fetching instances from:", `${API_BASE_URL}/instances`);
 
@@ -38,11 +43,7 @@ export async function GET(request: Request) {
       },
     });
 
-    // console.log("API Response status:", apiResponse.status);
-    // console.log("API Response headers:", JSON.stringify(Object.fromEntries(apiResponse.headers), null, 2));
-
     const responseText = await apiResponse.text();
-    console.log("API Response body:", responseText);
 
     if (!apiResponse.ok) {
       throw new Error(
@@ -58,11 +59,9 @@ export async function GET(request: Request) {
       throw new Error(`Failed to parse API response: ${responseText}`);
     }
 
-    // Fetch details for each instance
     const instanceDetails = await Promise.all(
       data.data.map(async (instance: any) => {
         const details = await fetchInstanceDetails(instance.id, accessToken);
-        // console.log('fecthed instances', details);
         return details.data;
       })
     );

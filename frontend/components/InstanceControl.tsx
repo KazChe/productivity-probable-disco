@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -59,8 +59,32 @@ export default function InstanceControl() {
     null
   );
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
+    const fetchInstances = async () => {
+      if (fetchedRef.current) return; // Prevent double fetch
+      fetchedRef.current = true;
+
+      const requestId = Math.random().toString(36).substring(7);
+      console.log(`Initiating fetch request: ${requestId}`);
+
+      try {
+        const response = await fetch(`/api/neo4j-proxy?requestId=${requestId}`);
+        const data = await response.json();
+        setInstances(data.instances || []);
+
+        if (data.instances && data.instances.length > 0) {
+          await Promise.all(
+            data.instances.map((instance) => fetchInstanceDetails(instance.id))
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching instances:", error);
+        setError("Failed to fetch instances. Please try again.");
+      }
+    };
+
     fetchInstances();
   }, []);
 
@@ -82,25 +106,41 @@ export default function InstanceControl() {
     }
   }, [alert]);
 
-  const fetchInstances = async () => {
+  const fetchInstanceDetails = async (instanceId: string) => {
     setIsLoading(true);
-    setError(null);
+    setPulsingInstanceId(instanceId);
     try {
-      const response = await fetch("/api/neo4j-proxy");
+      const response = await fetch(
+        `/api/aura-instance-details?instanceId=${instanceId}`
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setInstances(data.instances || []);
+      console.log("Fetched instance details:", data.data.status);
+      setSelectedInstanceDetails(data);
 
-      if (data.instances && data.instances.length > 0) {
-        await Promise.all(
-          data.instances.map((instance) => fetchInstanceDetails(instance.id))
-        );
-      }
+      setInstances((prevInstances) =>
+        prevInstances.map((instance) =>
+          instance.id === instanceId
+            ? {
+                ...instance,
+                status: data.data.status,
+                lastUpdated: new Date().toISOString(),
+              }
+            : instance
+        )
+      );
     } catch (error) {
-      console.error("Error fetching instances:", error);
-      setError("Failed to fetch instances. Please try again.");
+      console.error(
+        `Error fetching details for instance ${instanceId}:`,
+        error
+      );
+      setAlert({
+        title: "Fetch Failed",
+        description: "Failed to fetch instance details. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -152,46 +192,6 @@ export default function InstanceControl() {
       setAlert({
         title: "Action Failed",
         description: `Failed to ${action} the instance. Please try again.`,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchInstanceDetails = async (instanceId: string) => {
-    setIsLoading(true);
-    setPulsingInstanceId(instanceId);
-    try {
-      const response = await fetch(
-        `/api/aura-instance-details?instanceId=${instanceId}`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log("Fetched instance details:", data.data.status);
-      setSelectedInstanceDetails(data);
-
-      setInstances((prevInstances) =>
-        prevInstances.map((instance) =>
-          instance.id === instanceId
-            ? {
-                ...instance,
-                status: data.data.status,
-                lastUpdated: new Date().toISOString(),
-              }
-            : instance
-        )
-      );
-    } catch (error) {
-      console.error(
-        `Error fetching details for instance ${instanceId}:`,
-        error
-      );
-      setAlert({
-        title: "Fetch Failed",
-        description: "Failed to fetch instance details. Please try again.",
         variant: "destructive",
       });
     } finally {
