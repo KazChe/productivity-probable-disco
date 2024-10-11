@@ -62,7 +62,7 @@ const InstanceActions: React.FC<InstanceActionProps> = React.memo(
           disabled={
             isLoading || ["resuming", "pausing"].includes(instance.status)
           }
-          className="p-1" // Added padding to make the button slightly larger than the icon
+          className="p-1"
         >
           {instance.status === "running" ? (
             <Pause className="h-3 w-3" />
@@ -75,7 +75,7 @@ const InstanceActions: React.FC<InstanceActionProps> = React.memo(
           variant="outline"
           onClick={handleRefresh}
           disabled={isLoading}
-          className="p-1" // Added padding to make the button slightly larger than the icon
+          className="p-1"
         >
           <RefreshCw
             className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`}
@@ -122,7 +122,8 @@ export function InstanceTableComponent({
               <TableHead>Last Updated</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Specs</TableHead>
-              <TableHead className="w-[160px]">Actions</TableHead> {/* Increased width to accommodate new button */}
+              <TableHead className="w-[160px]">Actions</TableHead>{" "}
+              {/* Increased width to accommodate new button */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -156,7 +157,9 @@ export function InstanceTableComponent({
                   {instance.memory} | {instance.storage} | {instance.region}
                 </TableCell>
                 <TableCell>
-                  <div className="flex space-x-1"> {/* Reduced space between buttons */}
+                  <div className="flex space-x-1">
+                    {" "}
+                    {/* Reduced space between buttons */}
                     <Button
                       variant="destructive"
                       size="xs" // Changed to match InstanceActions buttons
@@ -179,7 +182,7 @@ export function InstanceTableComponent({
       ) : (
         <p>Loading instances...</p>
       )}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
+      <div className="h-24 bg-gradient-to-t from-gray-900 to-tr ansparent pointer-events-none"></div>
     </div>
   );
 }
