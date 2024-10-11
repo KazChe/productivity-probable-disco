@@ -13,6 +13,7 @@ import TodaysNews from "./TodaysNews";
 import OOMMetricDashboard from "./OOMMetricDashboard";
 import InstanceControl from "./InstanceControl";
 import Image from "next/image";
+import VectorDBSave from "./VectorDBSave";
 
 type Message = {
   role: "user" | "assistant";
@@ -105,8 +106,9 @@ export default function ProductivityTool() {
                 className="flex items-center justify-between cursor-pointer hover:text-gray-200"
                 onClick={() => setSelectedItem("Save to Vector DB")}
               >
+                
                 <span>Save to Vector DB</span>
-                <Database className="w-4 h-4" />
+              <Database className="w-4 h-4" />
               </div>
               {/* <div
                 className="flex items-center justify-between cursor-pointer hover:text-gray-200"
@@ -183,35 +185,7 @@ export default function ProductivityTool() {
             </form>
           </div>
         ) : selectedItem === "Save to Vector DB" ? (
-          <div className="flex-1 flex flex-col p-4">
-            <textarea
-              value={vectorDbInput}
-              onChange={(e) => setVectorDbInput(e.target.value)}
-              className="w-full h-40 p-2 mb-4 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              placeholder="Enter data to save to Vector DB..."
-            />
-            <div className="flex flex-wrap gap-2 mb-4">
-              {tags.map((tag, index) => (
-                <button
-                  key={tag.name}
-                  onClick={() => handleTagToggle(index)}
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    tag.active
-                      ? "bg-green-600 text-white"
-                      : "bg-gray-700 text-gray-300"
-                  }`}
-                >
-                  #{tag.name}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={handleSaveToVectorDb}
-              className="p-2 bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
-            >
-              Save
-            </button>
-          </div>
+          <VectorDBSave />
         ) : selectedItem === "OOM Metric Dashboard" ? (
           <div className="flex-1 p-4">
             <OOMMetricDashboard />
