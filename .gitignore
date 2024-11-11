@@ -69,3 +69,5 @@ next-env.d.ts
 
 backend/target/
 Blogs/
+reference/
+.env.local
