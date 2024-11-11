@@ -2,7 +2,7 @@ import { Neo4jClient } from './neo4j-client';
 import { generateEmbedding } from './vertex-ai-embeddings';
 /*
     service to handles calling our embedding service and save 
-    () to neo4j
+    (content, category, subcategory, tags) to neo4j
 */
 interface SaveContentParams {
   text: string;
