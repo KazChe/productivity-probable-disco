@@ -17,9 +17,8 @@ export class Neo4jService {
   constructor() {
     this.client = new Neo4jClient();
   }
-
   async saveContent({ text, category, subcategory, tags }: SaveContentParams) {
-    const session = this.client.driver.session();
+    const session = this.client.getSession();
     try {
       // call embedding service
       const embedding = await generateEmbedding(text);

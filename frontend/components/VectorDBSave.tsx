@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { Neo4jService } from '@/lib/neo4j-service';
 
 type Tag = {
   name: string;
@@ -23,6 +24,7 @@ type Category = {
 };
 
 export default function VectorDBSave() {
+
   const [vectorDbInput, setVectorDbInput] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
@@ -42,7 +44,11 @@ export default function VectorDBSave() {
   const [categories, setCategories] = useState<Category[]>([
     { name: "Development", subcategories: ["Frontend", "Backend", "DevOps"] },
     { name: "Design", subcategories: ["UI", "UX", "Graphic Design"] },
+    { name: "Documentation", subcategories: ["API", "User Guide", "Technical Specs"] }
   ]);
+
+  const [error, setError] = useState<string | null>(null);
+  const neo4jService = new Neo4jService();
 
   const handleTagToggle = (index: number) => {
     const newTags = [...tags];
@@ -80,20 +86,32 @@ export default function VectorDBSave() {
 
   const handleSaveToVectorDb = async () => {
     setIsLoading(true);
-    const activeTags = tags.filter((tag) => tag.active).map((tag) => tag.name);
-    console.log("Saving to Vector DB:", {
-      text: vectorDbInput,
-      category: selectedCategory,
-      subcategory: selectedSubcategory,
-      tags: activeTags,
-    });
-    // Simulating an API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    setVectorDbInput("");
-    setSelectedCategory("");
-    setSelectedSubcategory("");
-    setTags(tags.map((tag) => ({ ...tag, active: false })));
+    setError(null);
+    
+    try {
+      const activeTags = tags.filter((tag) => tag.active).map((tag) => tag.name);
+      
+      await neo4jService.saveContent({
+        text: vectorDbInput,
+        category: selectedCategory,
+        subcategory: selectedSubcategory,
+        tags: activeTags,
+      });
+
+      // reset form
+      setVectorDbInput("");
+      setSelectedCategory("");
+      setSelectedSubcategory("");
+      setTags(tags.map((tag) => ({ ...tag, active: false })));
+      
+      // Show success message (you can use your toast system here)
+      
+    } catch (err) {
+      console.error('Error saving to vector DB:', err);
+      setError('Failed to save content. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
