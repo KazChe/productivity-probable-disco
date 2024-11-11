@@ -1,5 +1,6 @@
 import { Neo4jClient } from './neo4j-client';
 import { generateEmbedding } from './vertex-ai-embeddings';
+import { CONTENT_QUERIES } from './queries/content-queries';
 /*
     service to handles calling our embedding service and save 
     (content, category, subcategory, tags) to neo4j
@@ -23,28 +24,7 @@ export class Neo4jService {
       // call embedding service
       const embedding = await generateEmbedding(text);
       const result = await session.executeWrite(tx =>
-        tx.run(`
-          MERGE (cat:Category {name: $category})
-          WITH cat
-          MERGE (subcat:SubCategory {name: $subcategory})
-          MERGE (subcat)-[:CHILD_OF]->(cat)
-          WITH cat, subcat
-          CREATE (c:Content {
-              id: randomUUID(),
-              text: $text,
-              textEmbedding: $embedding,
-              createdAt: datetime(),
-              updatedAt: datetime()
-          })
-          MERGE (c)-[:BELONGS_TO]->(cat)
-          MERGE (c)-[:SUBCATEGORIZED_AS]->(subcat)
-          WITH c
-          UNWIND $tags as tagName
-          MERGE (t:Tag {name: tagName})
-          MERGE (c)-[:TAGGED_WITH]->(t)
-          
-          RETURN c.id as contentId
-        `, {
+        tx.run(CONTENT_QUERIES.saveContent, {
           text,
           category,
           subcategory,
